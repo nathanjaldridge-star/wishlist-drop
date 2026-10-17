@@ -1,0 +1,53 @@
+PASS F1 First run: examples seeded + labelled, add box focused, welcome shown, no signup
+PASS F2 Add by name with price (default 15%)
+PASS F3 Add by link → readable name, URL kept — Sony Wireless Headphones Black 10240179
+PASS F4 Odd URLs: www., no scheme, amazon /dp/, query only, IDN, emoji path — Amazon item | Apple AirPods Pro 2nd Generation | Shop item | Café CrèMe | Wishlist item | 🎧 Headphones
+PASS F5 Blank price → prompt; cancel/invalid prompt → friendly warning, nothing added
+PASS F6 Zero / negative price rejected
+PASS F7 Sub-penny price (0.001) rejected (would give £0.00 reference / NaN%)
+PASS F8 Huge price (99999999) renders without overflow/NaN
+PASS F9 % slider bounds 10 and 20 respected
+PASS F10 £ target: 95 of 100 → clamped 10%, 50 of 100 → clamped 20%, 120 of 100 → 10%, 85 → 15%
+PASS F11 £ target hint explains clamping
+PASS F12 10-item cap: 11th blocked with message; seed button blocked
+PASS F13 Edit item: name/price/pct saved, count unchanged at cap
+PASS F14 Cancel edit resets form
+PASS F15 Delete item while it is being edited → submit does not crash
+PASS F16 Empty submit → warning + focus
+PASS F17 Error states not_found/blocked/changed render + alerts paused; back to OK
+PASS F18 Simulate a day ×30 → ≥10% drop alert fires with retailer, all DEMO-labelled
+PASS F19 Auto-simulate toggles on/off
+PASS F20 Alerts tab: badge count, clear
+PASS F21 Persistence: reload keeps items
+PASS F22 Clear all → empty state, examples button returns
+PASS S1 Share link round-trip: 10 items with unicode, emoji, quotes, long names — URL length 1318
+PASS S2 Corrupted hash (#list=garbage) → falls back to own list, no error
+PASS S3 Valid base64 but wrong JSON shape (#list={"v":2,"i":"x"}) handled
+PASS S4 XSS via crafted share hash (p field / javascript: URL / bad numbers) blocked
+PASS S5 XSS via item name / link typed in form
+PASS S6 Read-only view: Save a copy imports (respects 10 cap) and returns to app
+PASS S7 "Open my own wishlist" exits read-only and clears hash
+PASS S8 v1 share link (pounds) decodes
+PASS S9 Copy share link button (clipboard) + message; empty list warns
+PASS S10 Share card PNG: 10 long/emoji names drawn, download fires
+PASS S11 Share card empty list → warning, no canvas
+PASS L1 Corrupted localStorage {not json → app still usable
+PASS L2 Corrupted localStorage {"items":"oops"} → app still usable
+PASS L3 Corrupted localStorage {"items":[{"id":"a","name":"No price"}]} → app still usable
+PASS L4 Corrupted localStorage {"items":[null,42,{"id":"b","name":"ok","orig":500,"cur":500,"pct":15,"src":"demo","hist":[]}]} → app still usable
+PASS L5 v1 migration (incl. item with no cur)
+PASS L6 localStorage full/disabled (setItem throws) → no crash
+PASS N1 Offline (file://, live fetch fails) → snapshot fallback labelled
+PASS N2 Slow/failed mirror (https path simulated via WD_MIRROR 500) → snapshot
+PASS N3 Mirror returns changed/garbage XML → snapshot + "format changed"
+PASS N4 Mirror OK → Live mode
+PASS N5 HUKD feed javascript: link not rendered as href
+PASS V360 Layout at 360px: no horizontal scroll, tabs visible, screenshot
+PASS V390 Layout at 390px: no horizontal scroll, tabs visible, screenshot
+PASS V430 Layout at 430px: no horizontal scroll, tabs visible, screenshot
+PASS V1280 Layout at 1280px: no horizontal scroll, tabs visible, screenshot
+PASS K1 Keyboard-only: add item with Tab/Enter, Space on % toggle, tabs reachable
+PASS A1 axe-core WCAG 2.1 AA scan (watch, alerts, share, read-only) — 3 minor/moderate: watch: region (moderate) ×2 e.g. div[role="note"]; alerts: region (moderate) ×2 e.g. div[role="note"]; share: region (moderate) ×2 e.g. div[role="note"]
+PASS A2 Form controls all have accessible names
+PASS E1 No JS errors in main session
+52/52 passed

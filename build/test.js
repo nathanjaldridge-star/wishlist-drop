@@ -8,7 +8,7 @@ const D='/workspace/wishlist-drop/';const log=[];const ok=m=>{log.push('✓ '+m)
 (async()=>{const b=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
 const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:1});const p=await ctx.newPage();
 const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()=='error'&&!/hotukdeals|CORS|Failed to fetch|ERR_FAILED/i.test(m.text()))errs.push(m.text())});
-let promptAns='59.99';p.on('dialog',d=>d.accept(d.type()=='prompt'?promptAns:undefined));
+let promptAns='59.99';await p.exposeFunction('WD_DIALOG_HOOK',(m,t)=>t=='prompt'?promptAns:true);p.on('dialog',d=>d.accept(d.type()=='prompt'?promptAns:undefined));
 await p.goto('file://'+D+'index.html');await p.waitForSelector('html[data-ready="1"]',{timeout:15000});
 const S=()=>p.evaluate(()=>WD.state());
 let s=await S();As.equal(s.items.length,3);ok('loads, 3 labelled examples seeded');
@@ -67,6 +67,6 @@ await p.click('[data-t=watch]');
 const small=await p.evaluate(()=>[...document.querySelectorAll('button,input:not([type=checkbox]),select,summary')].filter(e=>e.offsetParent&&e.getBoundingClientRect().height<44).map(e=>e.id||e.textContent));
 As.deepEqual(small,[]);ok('all visible controls ≥44px tall');
 // v1 migration
-const p3=await (await b.newContext()).newPage();await p3.goto('file://'+D+'index.html');await p3.evaluate(()=>{localStorage.clear();localStorage.setItem('wishlistDrop.v1',JSON.stringify({items:[{id:'a',name:'Old',orig:12.5,cur:11,pct:15,hist:[12.5,11]}],alerts:[],seeded:true}))});
+const p3=await (await b.newContext()).newPage();await p3.goto('file://'+D+'index.html');await p3.waitForSelector('html[data-ready="1"]');await p3.evaluate(()=>{localStorage.clear();localStorage.setItem('wishlistDrop.v1',JSON.stringify({items:[{id:'a',name:'Old',orig:12.5,cur:11,pct:15,hist:[12.5,11]}],alerts:[],seeded:true}))});
 await p3.reload();await p3.waitForSelector('html[data-ready="1"]');const m=await p3.evaluate(()=>WD.state().items[0]);As.equal(m.orig,1250);ok('v1 localStorage migrated (£12.50 → 1250p)');
 As.equal(errs.length,0,errs.join('\n'));ok('no JS errors');console.log(log.join('\n'));await b.close()})().catch(e=>{console.error(log.join('\n'));console.error(e);process.exit(1)});

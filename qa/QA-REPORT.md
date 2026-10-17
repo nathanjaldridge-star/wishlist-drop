@@ -1,0 +1,109 @@
+# Wishlist Drop — QA report
+Date: 2026-10-17 (Europe/London). Build: `index.html` generated from `build/src.html` by `node build/build.js` (inlines /workspace/deal-sources/hukd_sample.xml).
+Automation: `NODE_PATH=/tmp/wdt/node_modules node qa/qa.js` (52 cases, Playwright + Chrome, axe-core). The existing `build/test.js` also passes.
+
+**Result after fixes: 52/52 automated cases pass. Before fixes: 35/52 (several failures cascaded from bug B3).**
+
+## Test plan / results
+F = form & dashboard, S = share/read-only/card, L = storage, N = data loading, V = viewports, K = keyboard, A = accessibility.
+
+| ID | Case | Result | Notes |
+|---|---|---|---|
+| F1 | First run: examples seeded + labelled, add box focused, welcome shown, no signup | ✅ PASS |  |
+| F2 | Add by name with price (default 15%) | ✅ PASS |  |
+| F3 | Add by link → readable name, URL kept | ✅ PASS | Sony Wireless Headphones Black 10240179 |
+| F4 | Odd URLs: www., no scheme, amazon /dp/, query only, IDN, emoji path | ✅ PASS | Amazon item / Apple AirPods Pro 2nd Generation / Shop item / Café CrèMe / Wishlist item / 🎧 Headphones |
+| F5 | Blank price → prompt; cancel/invalid prompt → friendly warning, nothing added | ✅ PASS |  |
+| F6 | Zero / negative price rejected | ✅ PASS |  |
+| F7 | Sub-penny price (0.001) rejected (would give £0.00 reference / NaN%) | ✅ PASS |  |
+| F8 | Huge price (99999999) renders without overflow/NaN | ✅ PASS |  |
+| F9 | % slider bounds 10 and 20 respected | ✅ PASS |  |
+| F10 | £ target: 95 of 100 → clamped 10%, 50 of 100 → clamped 20%, 120 of 100 → 10%, 85 → 15% | ✅ PASS |  |
+| F11 | £ target hint explains clamping | ✅ PASS |  |
+| F12 | 10-item cap: 11th blocked with message; seed button blocked | ✅ PASS |  |
+| F13 | Edit item: name/price/pct saved, count unchanged at cap | ✅ PASS |  |
+| F14 | Cancel edit resets form | ✅ PASS |  |
+| F15 | Delete item while it is being edited → submit does not crash | ✅ PASS |  |
+| F16 | Empty submit → warning + focus | ✅ PASS |  |
+| F17 | Error states not_found/blocked/changed render + alerts paused; back to OK | ✅ PASS |  |
+| F18 | Simulate a day ×30 → ≥10% drop alert fires with retailer, all DEMO-labelled | ✅ PASS |  |
+| F19 | Auto-simulate toggles on/off | ✅ PASS |  |
+| F20 | Alerts tab: badge count, clear | ✅ PASS |  |
+| F21 | Persistence: reload keeps items | ✅ PASS |  |
+| F22 | Clear all → empty state, examples button returns | ✅ PASS |  |
+| S1 | Share link round-trip: 10 items with unicode, emoji, quotes, long names | ✅ PASS | URL length 1318 |
+| S2 | Corrupted hash (#list=garbage) → falls back to own list, no error | ✅ PASS |  |
+| S3 | Valid base64 but wrong JSON shape (#list={"v":2,"i":"x"}) handled | ✅ PASS |  |
+| S4 | XSS via crafted share hash (p field / javascript: URL / bad numbers) blocked | ✅ PASS |  |
+| S5 | XSS via item name / link typed in form | ✅ PASS |  |
+| S6 | Read-only view: Save a copy imports (respects 10 cap) and returns to app | ✅ PASS |  |
+| S7 | "Open my own wishlist" exits read-only and clears hash | ✅ PASS |  |
+| S8 | v1 share link (pounds) decodes | ✅ PASS |  |
+| S9 | Copy share link button (clipboard) + message; empty list warns | ✅ PASS |  |
+| S10 | Share card PNG: 10 long/emoji names drawn, download fires | ✅ PASS |  |
+| S11 | Share card empty list → warning, no canvas | ✅ PASS |  |
+| L1 | Corrupted localStorage {not json → app still usable | ✅ PASS |  |
+| L2 | Corrupted localStorage {"items":"oops"} → app still usable | ✅ PASS |  |
+| L3 | Corrupted localStorage {"items":[{"id":"a","name":"No price"}]} → app still usable | ✅ PASS |  |
+| L4 | Corrupted localStorage {"items":[null,42,{"id":"b","name":"ok","orig":500,"cur":500,"pct":15,"src":"demo","hist":[]}]} → app still usable | ✅ PASS |  |
+| L5 | v1 migration (incl. item with no cur) | ✅ PASS |  |
+| L6 | localStorage full/disabled (setItem throws) → no crash | ✅ PASS |  |
+| N1 | Offline (file://, live fetch fails) → snapshot fallback labelled | ✅ PASS |  |
+| N2 | Slow/failed mirror (https path simulated via WD_MIRROR 500) → snapshot | ✅ PASS |  |
+| N3 | Mirror returns changed/garbage XML → snapshot + "format changed" | ✅ PASS |  |
+| N4 | Mirror OK → Live mode | ✅ PASS |  |
+| N5 | HUKD feed javascript: link not rendered as href | ✅ PASS |  |
+| V360 | Layout at 360px: no horizontal scroll, tabs visible, screenshot | ✅ PASS |  |
+| V390 | Layout at 390px: no horizontal scroll, tabs visible, screenshot | ✅ PASS |  |
+| V430 | Layout at 430px: no horizontal scroll, tabs visible, screenshot | ✅ PASS |  |
+| V1280 | Layout at 1280px: no horizontal scroll, tabs visible, screenshot | ✅ PASS |  |
+| K1 | Keyboard-only: add item with Tab/Enter, Space on % toggle, tabs reachable | ✅ PASS |  |
+| A1 | axe-core WCAG 2.1 AA scan (watch, alerts, share, read-only) | ✅ PASS | 3 minor/moderate: watch: region (moderate) ×2 e.g. div[role="note"]; alerts: region (moderate) ×2 e.g. div[role="note"]; share: region (moderate) ×2 e.g. div[ro |
+| A2 | Form controls all have accessible names | ✅ PASS |  |
+| E1 | No JS errors in main session | ✅ PASS |  |
+
+Artifacts: `qa/layout-{360,390,430,1280}.png`, `qa/ok-shared-unicode.png`, `qa/s4-shared-evil.png` / `qa/s4-imported-evil.png` (hostile share link, after the fix), `qa/ok-share-card.png`, `qa/ok-error-changed.png`, `qa/ok-alerts.png`, `qa/axe.txt`, `qa/results.json`, `qa/run.log`.
+
+## Bugs found and fixed (in build/src.html, index.html rebuilt)
+| # | Severity | Bug | Fix |
+|---|---|---|---|
+| B1 | **Critical (security)** | XSS through a crafted share link: the pct field went into the read-only Top 10 HTML without escaping, so code ran as soon as someone opened the link. A javascript: URL in a share link also became a clickable href after "Save a copy". | Shared lists are now cleaned in dec(): must be an array, 10-item cap, pct clamped to 10–20, prices ≥1p, source and error state on an allow-list, only http(s) URLs kept. |
+| B2 | High (security) | A javascript: link in the HotUKDeals feed or mirror was rendered as the matched-deal href. | New safeUrl() lets only http(s) through on every href. |
+| B3 | High | Deleting an item while it was open for editing, then pressing Save, threw a TypeError. The form stayed stuck in edit mode. | Deleting the item being edited resets the form, and saving an edit for an item that no longer exists falls back to adding it (cap still checked). |
+| B4 | High | "Save a copy to my wishlist" threw a TypeError (shared was nulled before use), so the import / 10-item-limit message never showed. | The total is captured before leaving the view, and every import now shows a confirmation. |
+| B5 | High | Corrupted localStorage (items not an array, null entries, missing price or alerts) crashed the app on boot. You could not add anything. | load() validates each item (cleanItem) and defaults alerts. |
+| B6 | Medium | A share hash with the wrong JSON shape crashed instead of falling back. | Covered by the B1 cleaning, and an empty list shows your own wishlist. |
+| B7 | Medium | A price of 0.001 was accepted as £0.00, which gave NaN% and Infinity in the comparison. No upper limit existed. | Prices must be £0.01–£1,000,000, with a friendly message. |
+| B8 | Medium | v1 migration: an item without cur became NaN. | It falls back to the original price. |
+| B9 | Low | Large prices overflowed the stats grid at 390px. | min-width:0 and overflow-wrap on stats. |
+| B10 | Medium (a11y) | axe found 6 serious color-contrast failures on the "Awaiting approval" source rows (opacity .75). | Removed the opacity. |
+| T1 | Test | The v1-migration step in build/test.js was flaky because of a race with the first-run seed save. It also fails on the original build. | The test now waits for data-ready first. |
+
+## Open issues (not fixed)
+**High (product)**
+- The core goal (≥10% below reference at Amazon or top UK retailers) is still simulated. Amazon and Argos offers are DEMO only, and the only real source is HotUKDeals (community reported, fuzzy name match). Real prices need Awin, Amazon PA-API or Keepa approval.
+
+**Medium**
+- Reference price = the price the user typed, not a market price. If a user enters a wrong price, the alerts are wrong.
+- ~~window.prompt/confirm~~: fixed, see U1 below.
+- Share links are about 1.3 KB for 10 unicode items and can reach roughly 4–6 KB with long URLs. Some chat apps may truncate them, and a short-link service would need a backend.
+
+**Low**
+- ~~Tabs arrow keys / landmarks~~: fixed (U2, U3).
+- ~~Auto-simulate not remembered~~ (fixed, U6). Price history is capped at 30 points.
+- Accented casing fixed (U4); nameFromUrl still gives "Amazon item" for bare /dp/ links. The name can be edited.
+- ~~Silent storage loss~~: fixed (U5).
+
+## Not covered by automation
+Real iOS Safari / Android devices, VoiceOver/TalkBack (only labels and axe were checked), the native share sheet (not available in headless), and the live GitHub Pages mirror (data/hukd.json, simulated with route mocks in N2–N5).
+
+## Follow-up fixes (2026-10-17, 03:xx BST): previously open items now closed
+| # | Item | Fix | Test |
+|---|---|---|---|
+| U1 | prompt()/confirm()/alert() blocked in in-app browsers | In-app modal dialog (role=dialog, aria-modal, focus trap, Esc/backdrop cancel, focus restored). Used for the missing price, manual price, delete, clear all and the copy-link fallback. No native dialogs remain. | D1 |
+| U2 | Banner and nav outside landmarks (axe "region") | `<header role=banner>`, DEMO notice is a labelled region, and `<nav aria-label>` wraps the tablist. axe moderate findings went from 6 to 0. | A1, A3 |
+| U3 | No arrow-key tab navigation | Roving tabindex: Left/Right/Home/End, wraps, aria-controls/labelledby. | K1 (updated), K2 |
+| U4 | "Café CrèMe" title-casing | Unicode-safe word capitalisation, giving "Café Crème" and "Éléphant Rose". | T2 |
+| U5 | Silent data loss without localStorage | Storage probe on boot plus a warning on save failure (visible alert banner). | L7 |
+| U6 | Auto-simulate not remembered | Stored in state and restored on load. | P1 |
+Tests: qa/qa.js now has 58 cases, and build/test.js uses a dialog hook (`window.WD_DIALOG_HOOK`, test-only) in place of native dialog handlers.

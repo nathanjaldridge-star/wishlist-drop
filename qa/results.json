@@ -1,0 +1,350 @@
+[
+ {
+  "id": "F1",
+  "name": "First run: examples seeded + labelled, add box focused, welcome shown, no signup",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F2",
+  "name": "Add by name with price (default 15%)",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F3",
+  "name": "Add by link → readable name, URL kept",
+  "ok": true,
+  "note": "Sony Wireless Headphones Black 10240179"
+ },
+ {
+  "id": "F4",
+  "name": "Odd URLs: www., no scheme, amazon /dp/, query only, IDN, emoji path",
+  "ok": true,
+  "note": "Amazon item | Apple AirPods Pro 2nd Generation | Shop item | Café Crème | Wishlist item | 🎧 Headphones"
+ },
+ {
+  "id": "F5",
+  "name": "Blank price → prompt; cancel/invalid prompt → friendly warning, nothing added",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F6",
+  "name": "Zero / negative price rejected",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F7",
+  "name": "Sub-penny price (0.001) rejected (would give £0.00 reference / NaN%)",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F8",
+  "name": "Huge price (99999999) renders without overflow/NaN",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F9",
+  "name": "% slider bounds 10 and 20 respected",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F10",
+  "name": "£ target: 95 of 100 → clamped 10%, 50 of 100 → clamped 20%, 120 of 100 → 10%, 85 → 15%",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F11",
+  "name": "£ target hint explains clamping",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F12",
+  "name": "10-item cap: 11th blocked with message; seed button blocked",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F13",
+  "name": "Edit item: name/price/pct saved, count unchanged at cap",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F14",
+  "name": "Cancel edit resets form",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F15",
+  "name": "Delete item while it is being edited → submit does not crash",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F16",
+  "name": "Empty submit → warning + focus",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F17",
+  "name": "Error states not_found/blocked/changed render + alerts paused; back to OK",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F18",
+  "name": "Simulate a day ×30 → ≥10% drop alert fires with retailer, all DEMO-labelled",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F19",
+  "name": "Auto-simulate toggles on/off",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F20",
+  "name": "Alerts tab: badge count, clear",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F21",
+  "name": "Persistence: reload keeps items",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "F22",
+  "name": "Clear all → empty state, examples button returns",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S1",
+  "name": "Share link round-trip: 10 items with unicode, emoji, quotes, long names",
+  "ok": true,
+  "note": "URL length 1318"
+ },
+ {
+  "id": "S2",
+  "name": "Corrupted hash (#list=garbage) → falls back to own list, no error",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S3",
+  "name": "Valid base64 but wrong JSON shape (#list={\"v\":2,\"i\":\"x\"}) handled",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S4",
+  "name": "XSS via crafted share hash (p field / javascript: URL / bad numbers) blocked",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S5",
+  "name": "XSS via item name / link typed in form",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S6",
+  "name": "Read-only view: Save a copy imports (respects 10 cap) and returns to app",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S7",
+  "name": "\"Open my own wishlist\" exits read-only and clears hash",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S8",
+  "name": "v1 share link (pounds) decodes",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S9",
+  "name": "Copy share link button (clipboard) + message; empty list warns",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S10",
+  "name": "Share card PNG: 10 long/emoji names drawn, download fires",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "S11",
+  "name": "Share card empty list → warning, no canvas",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "L1",
+  "name": "Corrupted localStorage {not json → app still usable",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "L2",
+  "name": "Corrupted localStorage {\"items\":\"oops\"} → app still usable",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "L3",
+  "name": "Corrupted localStorage {\"items\":[{\"id\":\"a\",\"name\":\"No price\"}]} → app still usable",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "L4",
+  "name": "Corrupted localStorage {\"items\":[null,42,{\"id\":\"b\",\"name\":\"ok\",\"orig\":500,\"cur\":500,\"pct\":15,\"src\":\"demo\",\"hist\":[]}]} → app still usable",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "L5",
+  "name": "v1 migration (incl. item with no cur)",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "L6",
+  "name": "localStorage full/disabled (setItem throws) → no crash",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "N1",
+  "name": "Offline (file://, live fetch fails) → snapshot fallback labelled",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "N2",
+  "name": "Slow/failed mirror (https path simulated via WD_MIRROR 500) → snapshot",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "N3",
+  "name": "Mirror returns changed/garbage XML → snapshot + \"format changed\"",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "N4",
+  "name": "Mirror OK → Live mode",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "N5",
+  "name": "HUKD feed javascript: link not rendered as href",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "V360",
+  "name": "Layout at 360px: no horizontal scroll, tabs visible, screenshot",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "V390",
+  "name": "Layout at 390px: no horizontal scroll, tabs visible, screenshot",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "V430",
+  "name": "Layout at 430px: no horizontal scroll, tabs visible, screenshot",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "V1280",
+  "name": "Layout at 1280px: no horizontal scroll, tabs visible, screenshot",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "K1",
+  "name": "Keyboard-only: add item with Tab/Enter, Space on % toggle, tab list reachable (roving tabindex: one Tab stop, arrows inside)",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "A1",
+  "name": "axe-core WCAG 2.1 AA scan (watch, alerts, share, read-only)",
+  "ok": true,
+  "note": "0 minor/moderate: "
+ },
+ {
+  "id": "A2",
+  "name": "Form controls all have accessible names",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "D1",
+  "name": "In-app dialogs (no native prompt/confirm): blank price asks in-app, delete + clear confirm in-app, Esc cancels",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "K2",
+  "name": "Tabs: arrow keys / Home / End move focus + selection (roving tabindex)",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "A3",
+  "name": "Landmarks: banner header, labelled demo region, nav wraps tablist",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "T2",
+  "name": "Accented title-casing: café-crème → \"Café Crème\"",
+  "ok": true,
+  "note": "Café Crème | Éléphant Rose"
+ },
+ {
+  "id": "L7",
+  "name": "localStorage unavailable → visible warning, app still works",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "P1",
+  "name": "Auto-simulate setting remembered across reload",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "E1",
+  "name": "No JS errors in main session",
+  "ok": true,
+  "note": ""
+ }
+]
