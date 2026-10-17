@@ -1,0 +1,26 @@
+name: Mirror HotUKDeals RSS
+on:
+  schedule: [{ cron: '*/30 * * * *' }]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+concurrency: { group: hukd-mirror, cancel-in-progress: false }
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node scripts/fetch-hukd.mjs
+      - name: Commit if changed
+        run: |
+          git config user.name "wishlist-drop-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/hukd.json
+          git diff --cached --quiet || (git commit -m "data: refresh HotUKDeals mirror" && git push)
+      - name: Request Pages rebuild
+        if: always()
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: gh api -X POST repos/${{ github.repository }}/pages/builds || true

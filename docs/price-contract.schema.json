@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://wishlistdrop.example/price-contract.schema.json",
+  "title": "Wishlist Drop price record",
+  "type": "object",
+  "required": ["product_id","canonical_url","retailer","title","current_price","currency","fetched_at","in_stock","price_history","source","confidence","error_state"],
+  "additionalProperties": false,
+  "properties": {
+    "label": {"type":"string","description":"Set to EXAMPLE on sample data only"},
+    "product_id": {"type":"string","minLength":1,"description":"Stable ID, e.g. 'awin:<aw_product_id>', 'keepa:<domainId>:<asin>', 'hukd:<thread id>'"},
+    "canonical_url": {"type":"string","format":"uri"},
+    "retailer": {"type":"string"},
+    "title": {"type":"string"},
+    "current_price": {"type":["integer","null"],"minimum":0,"description":"Minor units (pence). Null if unknown/error"},
+    "currency": {"type":"string","pattern":"^[A-Z]{3}$"},
+    "fetched_at": {"type":"string","format":"date-time"},
+    "in_stock": {"type":["boolean","null"]},
+    "was_price": {"type":["integer","null"],"minimum":0,"description":"Was/list/RRP price in minor units"},
+    "is_promo": {"type":"boolean","default":false},
+    "promo_code": {"type":["string","null"],"description":"Only from a source feed; never generated"},
+    "delivery_cost": {"type":["integer","null"],"minimum":0},
+    "price_history": {"type":"array","items":{"type":"object","required":["date","price"],"additionalProperties":false,"properties":{"date":{"type":"string","format":"date-time"},"price":{"type":["integer","null"],"minimum":0}}}},
+    "source": {"type":"string","enum":["awin_feed","awin_promotions","keepa","hukd_rss","manual"]},
+    "confidence": {"type":"number","minimum":0,"maximum":1},
+    "error_state": {"type":"string","enum":["ok","not_found","blocked","changed"]},
+    "error_detail": {"type":["string","null"]}
+  }
+}

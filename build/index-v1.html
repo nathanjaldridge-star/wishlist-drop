@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wishlist Drop</title>
+<style>
+:root{--bg:#f6f5fb;--card:#fff;--ink:#1c1b29;--mut:#5a5870;--pri:#5b3df5;--ok:#0d7a45;--okbg:#dff5e8;--dr:#9a5b00;--drbg:#fff1d6;--wa:#3d3a63;--wabg:#ebe9f7;--bad:#b42318;--r:16px}
+*{box-sizing:border-box}body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+.demo{background:#ffe7a3;color:#4a3500;text-align:center;font-weight:700;padding:8px;font-size:14px;position:sticky;top:0;z-index:5;letter-spacing:.02em}
+header{padding:16px 16px 4px;max-width:720px;margin:auto}h1{margin:0;font-size:26px}h1 span{color:var(--pri)}header p{margin:4px 0 0;color:var(--mut)}
+main{max-width:720px;margin:auto;padding:8px 16px 96px}
+section{background:var(--card);border-radius:var(--r);padding:16px;margin:12px 0;box-shadow:0 1px 3px #0000000f,0 6px 20px #2a1f7a0d}
+h2{font-size:18px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+label{display:block;font-weight:600;font-size:14px;margin:10px 0 4px}
+input[type=text],input[type=number],input[type=url]{width:100%;min-height:48px;border:1.5px solid #cfcbe6;border-radius:12px;padding:10px 12px;font-size:16px;background:#fff;color:var(--ink)}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+button{min-height:44px;min-width:44px;border:0;border-radius:12px;padding:10px 16px;font-size:15px;font-weight:600;cursor:pointer;background:var(--wabg);color:var(--wa)}
+button.pri{background:var(--pri);color:#fff}button.danger{color:var(--bad);background:#fde8e6}button.full{width:100%;margin-top:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}
+.seg{display:flex;background:var(--wabg);border-radius:12px;padding:4px;gap:4px}.seg button{flex:1;background:transparent}.seg button[aria-pressed=true]{background:#fff;color:var(--pri);box-shadow:0 1px 3px #0002}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--pri)}
+.hint{font-size:13px;color:var(--mut);margin:4px 0 0}.msg{margin-top:10px;padding:10px 12px;border-radius:12px;font-weight:600;display:none}.msg.show{display:block}.msg.warn{background:var(--drbg);color:#6b3f00}.msg.good{background:var(--okbg);color:var(--ok)}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #e3e0f2;z-index:6;padding-bottom:env(safe-area-inset-bottom)}.tabs button{flex:1;background:none;border-radius:0;min-height:58px;font-size:13px;color:var(--mut)}.tabs button[aria-selected=true]{color:var(--pri);box-shadow:inset 0 3px 0 var(--pri)}
+.card{border:1.5px solid #ece9f7;border-radius:14px;padding:12px;margin:10px 0}
+.ct{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.ct h3{margin:0;font-size:16px;word-break:break-word}.ct a{color:var(--pri);font-size:13px;word-break:break-all}
+.pill{font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px;white-space:nowrap}.p-w{background:var(--wabg);color:var(--wa)}.p-d{background:var(--drbg);color:var(--dr)}.p-t{background:var(--okbg);color:var(--ok)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0;font-size:12px;color:var(--mut)}.stats b{display:block;font-size:15px;color:var(--ink)}.down{color:var(--ok)!important}.up{color:var(--bad)!important}
+.bar{height:10px;background:#ece9f7;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#8b75ff,var(--pri));border-radius:9px}.bar.done i{background:var(--ok)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}svg.spark{width:110px;height:32px}
+.alert{border-left:4px solid var(--ok);background:#f4fbf7;padding:10px 12px;border-radius:10px;margin:8px 0}.alert time{display:block;font-size:12px;color:var(--mut)}
+ol.top{padding:0;list-style:none;counter-reset:n;margin:0}ol.top li{counter-increment:n;display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #eee}ol.top li:before{content:counter(n);font-weight:800;color:#fff;background:var(--pri);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:none}
+ol.top .g{flex:1}.small{font-size:13px;color:var(--mut)}.empty{color:var(--mut);text-align:center;padding:16px}
+.ro{background:var(--wabg);color:var(--wa);padding:10px 12px;border-radius:12px;font-weight:600;margin-bottom:10px}
+.toggle{display:flex;align-items:center;gap:10px;font-weight:600;min-height:44px}.toggle input{width:24px;height:24px;accent-color:var(--pri)}
+[hidden]{display:none!important}
+</style></head><body>
+<div class="demo" role="note">DEMO PRICES — simulated, not real</div>
+<header><h1>Wishlist <span>Drop</span></h1><p>Watch up to 10 things. Get told when they hit your target.</p></header>
+<main>
+<div id="roView" hidden>
+ <section><div class="ro">👀 Shared wishlist (read-only). Prices shown are DEMO / simulated.</div><h2 id="roTitle">Top 10</h2><ol class="top" id="roList"></ol>
+ <button class="pri full" id="importBtn">Save a copy to my wishlist</button><button class="full" id="exitRo">Open my own wishlist</button></section>
+</div>
+<div id="app">
+<div id="tab-watch" role="tabpanel">
+<section aria-labelledby="addH">
+ <h2 id="addH"><span id="formTitle">Add an item</span><span class="small" id="count">0/10</span></h2>
+ <form id="form" novalidate>
+  <label for="what">Paste a link or type a name</label>
+  <input type="text" id="what" autocomplete="off" placeholder="e.g. https://shop.com/sony-wh-1000xm5 or “Running shoes”" required>
+  <p class="hint" id="whatHint">Links get a readable name automatically.</p>
+  <div id="nameWrap" hidden><label for="name">Item name</label><input type="text" id="name"></div>
+  <label for="price">Current price (£) <span class="small">— optional, we'll ask if missing</span></label>
+  <input type="number" id="price" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 249.99">
+  <label id="tgtL">Target</label>
+  <div class="seg" role="group" aria-labelledby="tgtL"><button type="button" id="modePct" aria-pressed="true">% off</button><button type="button" id="modeAbs" aria-pressed="false">Target price £</button></div>
+  <div id="pctWrap"><label for="pct">Discount: <span id="pctOut">20%</span> off <span class="small">(10% min, 20% ideal)</span></label><input type="range" id="pct" min="10" max="20" step="1" value="20"></div>
+  <div id="absWrap" hidden><label for="abs">Target price (£)</label><input type="number" id="abs" inputmode="decimal" min="0" step="0.01"></div>
+  <p class="hint" id="conv" aria-live="polite"></p>
+  <div class="row"><button class="pri" type="submit" id="submitBtn">Add to wishlist</button><button type="button" id="cancelEdit" hidden>Cancel</button></div>
+  <div class="msg" id="msg" role="status" aria-live="polite"></div>
+ </form>
+</section>
+<section aria-labelledby="dashH">
+ <h2 id="dashH">Price watch <span class="small">demo data</span></h2>
+ <div class="row"><button class="pri" id="simBtn">⏩ Simulate a day</button></div>
+ <label class="toggle"><input type="checkbox" id="auto"> Auto-simulate (every 2s)</label>
+ <div id="cards"></div>
+ <div class="row" style="margin-top:8px"><button id="seedBtn">Load example items</button><button class="danger" id="clearBtn">Clear all</button></div>
+</section>
+</div>
+<div id="tab-alerts" role="tabpanel" hidden><section><h2>Alerts <button id="clearAlerts">Clear</button></h2><p class="small">Triggered by DEMO simulated prices.</p><div id="feed" aria-live="polite"></div></section></div>
+<div id="tab-share" role="tabpanel" hidden><section><h2>Your Top 10</h2><p class="small">Ranked by closeness to target. Demo prices.</p><ol class="top" id="topList"></ol>
+ <button class="pri full" id="copyBtn">🔗 Copy share link</button><button class="full" id="shareBtn" hidden>Share…</button><div class="msg" id="shareMsg" role="status" aria-live="polite"></div></section></div>
+</div>
+</main>
+<nav class="tabs" role="tablist" id="tabs"><button role="tab" aria-selected="true" data-t="watch">📋<br>Watch</button><button role="tab" aria-selected="false" data-t="alerts">🔔<br>Alerts <span id="badge"></span></button><button role="tab" aria-selected="false" data-t="share">🏆<br>Top 10</button></nav>
+<script>
+(function(){
+var MAX=10,KEY='wishlistDrop.v1',$=function(i){return document.getElementById(i)};
+var S={items:[],alerts:[],seeded:false};
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&d.items)S=d}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var gbp=function(n){return '£'+(+n).toFixed(2)};
+function uid(){return Math.random().toString(36).slice(2,9)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return'&#'+c.charCodeAt(0)+';'})}
+function isUrl(s){return /^(https?:\/\/|www\.)\S+$/i.test(s.trim())||/^[\w-]+(\.[\w-]+)+\/\S*$/.test(s.trim())}
+function nameFromUrl(s){try{var u=new URL(/^https?:/i.test(s)?s:'https://'+s);var segs=u.pathname.split('/').filter(Boolean).map(decodeURIComponent).filter(function(x){return /[a-z]{3}/i.test(x)&&!/^(dp|p|product|products|item|itm|gp|ref)$/i.test(x)});
+ var slug=segs.sort(function(a,b){return b.length-a.length})[0];
+ if(slug){slug=slug.replace(/\.(html?|php|aspx?)$/i,'').replace(/[-_+]+/g,' ').replace(/\b(?=[a-z]*\d)(?=\d*[a-z])[a-z0-9]{8,}\b/gi,'').replace(/\s+/g,' ').trim();if(slug)return slug.replace(/\b\w/g,function(c){return c.toUpperCase()}).slice(0,60)}
+ var h=u.hostname.replace(/^www\./,'').split('.')[0];return h.charAt(0).toUpperCase()+h.slice(1)+' item'}catch(e){return 'Wishlist item'}}
+function targetOf(it){return it.orig*(1-it.pct/100)}
+function status(it){if(it.cur<=targetOf(it)+1e-9)return['At target','p-t'];if(it.cur<it.orig-1e-9)return['Dropped','p-d'];return['Watching','p-w']}
+function mk(name,url,price,pct){return{id:uid(),name:name,url:url||'',orig:+price,cur:+price,pct:pct,hist:[+price],hit:false,added:Date.now()}}
+function seed(){var ex=[mk('Noise-cancelling Headphones (example)','https://example.com/headphones',279,20),mk('Espresso Machine (example)','https://example.com/espresso',189.99,15),mk('Trail Running Shoes (example)','',120,10)];
+ ex.forEach(function(e){e.example=true;var p=e.orig;for(var i=0;i<6;i++){p=Math.max(p*(1+(Math.random()*.06-.035)),e.orig*.75);e.hist.push(+p.toFixed(2))}e.cur=e.hist[e.hist.length-1]});
+ S.items=S.items.concat(ex).slice(0,MAX);S.seeded=true;ex.forEach(checkHit)}
+function checkHit(it){var at=it.cur<=targetOf(it)+1e-9;if(at&&!it.hit){S.alerts.unshift({id:uid(),t:Date.now(),text:it.name+' hit your '+it.pct+'% target: now '+gbp(it.cur)+' (was '+gbp(it.orig)+', target '+gbp(targetOf(it))+').'});S.alerts=S.alerts.slice(0,100)}it.hit=at}
+function simulate(){S.items.forEach(function(it){var r=Math.random(),ch=r<.45?-(Math.random()*.08+.01):r<.75?Math.random()*.05:0;var p=Math.min(Math.max(it.cur*(1+ch),it.orig*.6),it.orig*1.25);it.cur=+p.toFixed(2);it.hist.push(it.cur);if(it.hist.length>30)it.hist.shift();checkHit(it)});save();render()}
+window.WD={simulate:simulate,state:function(){return S},nameFromUrl:nameFromUrl};
+// form
+var mode='pct',editing=null;
+function setMode(m){mode=m;$('modePct').setAttribute('aria-pressed',m=='pct');$('modeAbs').setAttribute('aria-pressed',m=='abs');$('pctWrap').hidden=m!='pct';$('absWrap').hidden=m!='abs';
+ var p=+$('price').value;if(m=='abs'&&p>0&&!$('abs').value)$('abs').value=(p*(1-$('pct').value/100)).toFixed(2);conv()}
+function conv(){var p=+$('price').value,t=$('conv');$('pctOut').textContent=$('pct').value+'%';if(!(p>0)){t.textContent='';return}
+ if(mode=='pct'){t.textContent='= target price '+gbp(p*(1-$('pct').value/100))}else{var a=+$('abs').value;if(a>0){var pc=(1-a/p)*100;t.textContent='= '+pc.toFixed(1)+'% off'+(pc<10?' — minimum is 10%, will use 10%':pc>20?' — max is 20%, will use 20%':'')}else t.textContent=''}}
+function msg(el,txt,kind){el.textContent=txt;el.className='msg show '+kind;clearTimeout(el._t);el._t=setTimeout(function(){el.className='msg'},5000)}
+$('modePct').onclick=function(){setMode('pct')};$('modeAbs').onclick=function(){setMode('abs')};
+['pct','price','abs'].forEach(function(i){$(i).addEventListener('input',conv)});
+$('what').addEventListener('input',function(){var v=this.value.trim();if(isUrl(v)){$('nameWrap').hidden=false;if(!$('name')._touched)$('name').value=nameFromUrl(v);$('whatHint').textContent='Link detected — name filled in, edit if you like.'}else{$('nameWrap').hidden=true;$('whatHint').textContent='Links get a readable name automatically.'}});
+$('name').addEventListener('input',function(){this._touched=true});
+function resetForm(){$('form').reset();$('pct').value=20;$('name')._touched=false;$('nameWrap').hidden=true;editing=null;$('formTitle').textContent='Add an item';$('submitBtn').textContent='Add to wishlist';$('cancelEdit').hidden=true;setMode('pct');$('abs').value='';conv()}
+$('cancelEdit').onclick=resetForm;
+$('form').onsubmit=function(e){e.preventDefault();var v=$('what').value.trim();
+ if(!v){msg($('msg'),'Paste a link or type what you want first 🙂','warn');$('what').focus();return}
+ if(!editing&&S.items.length>=MAX){msg($('msg'),'Your list is full (10 items max). Remove one to make room — keeps it focused!','warn');return}
+ var url='',name=v;if(isUrl(v)){url=/^https?:/i.test(v)?v:'https://'+v;name=$('name').value.trim()||nameFromUrl(v)}
+ var price=+$('price').value;
+ if(!(price>0)){var a=window.prompt('What does “'+name+'” cost right now? (£)');price=parseFloat(String(a||'').replace(/[£,\s]/g,''));if(!(price>0)){msg($('msg'),'Need a current price to watch it — add one above.','warn');$('price').focus();return}$('price').value=price}
+ var pct=+$('pct').value;if(mode=='abs'){var ab=+$('abs').value;if(ab>0)pct=Math.round((1-ab/price)*100)}pct=Math.min(20,Math.max(10,pct));
+ if(editing){var it=S.items.find(function(x){return x.id==editing});it.name=name;it.url=url;if(it.orig!=price){it.orig=price;it.cur=price;it.hist=[price]}it.pct=pct;it.hit=false;checkHit(it);msg($('msg'),'Saved changes ✓','good')}
+ else{var n=mk(name,url,price,pct);S.items.push(n);msg($('msg'),'Added “'+name+'” — watching for '+pct+'% off ('+gbp(targetOf(n))+') ✓','good')}
+ save();var m=$('msg').textContent,k=$('msg').className;resetForm();$('msg').textContent=m;$('msg').className=k;render()};
+// render
+function spark(h,tgt){var w=110,hh=32,all=h.concat([tgt]),mn=Math.min.apply(0,all),mx=Math.max.apply(0,all),rg=mx-mn||1;var pts=h.map(function(v,i){return((h.length<2?w:i*w/(h.length-1))).toFixed(1)+','+(hh-2-(v-mn)/rg*(hh-4)).toFixed(1)}).join(' ');var ty=(hh-2-(tgt-mn)/rg*(hh-4)).toFixed(1);
+ return '<svg class="spark" viewBox="0 0 110 32" role="img" aria-label="Demo price history, '+h.length+' points"><line x1="0" x2="110" y1="'+ty+'" y2="'+ty+'" stroke="#0d7a45" stroke-dasharray="3 3" stroke-width="1"/><polyline fill="none" stroke="#5b3df5" stroke-width="2" points="'+pts+'"/></svg>'}
+function render(){$('count').textContent=S.items.length+'/10';var c=$('cards');
+ c.innerHTML=S.items.length?'':'<p class="empty">Nothing here yet. Add something above, or load the examples.</p>';
+ S.items.forEach(function(it){var t=targetOf(it),ch=(it.cur-it.orig)/it.orig*100,st=status(it),prog=Math.max(0,Math.min(100,(it.orig-it.cur)/(it.orig-t)*100));
+  var d=document.createElement('div');d.className='card';d.dataset.id=it.id;
+  d.innerHTML='<div class="ct"><div><h3>'+esc(it.name)+'</h3>'+(it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener">'+esc(it.url.replace(/^https?:\/\//,'').slice(0,40))+'</a>':'')+'</div><span class="pill '+st[1]+'">'+st[0]+'</span></div>'+
+  '<div class="stats"><div>Original<b>'+gbp(it.orig)+'</b></div><div>Now (demo)<b>'+gbp(it.cur)+'</b></div><div>Change<b class="'+(ch<0?'down':ch>0?'up':'')+'">'+(ch>0?'+':'')+ch.toFixed(1)+'%</b></div><div>Target −'+it.pct+'%<b>'+gbp(t)+'</b></div></div>'+
+  '<div class="bar'+(prog>=100?' done':'')+'" role="progressbar" aria-label="Progress to target" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(prog)+'"><i style="width:'+prog+'%"></i></div>'+
+  '<div class="foot">'+spark(it.hist,t)+'<div class="row" style="flex:0"><button data-a="edit" aria-label="Edit '+esc(it.name)+'">Edit</button><button class="danger" data-a="del" aria-label="Delete '+esc(it.name)+'">Delete</button></div></div>';c.appendChild(d)});
+ $('feed').innerHTML=S.alerts.length?S.alerts.map(function(a){return'<div class="alert">🎯 '+esc(a.text)+'<time datetime="'+new Date(a.t).toISOString()+'">'+new Date(a.t).toLocaleString('en-GB')+' · demo</time></div>'}).join(''):'<p class="empty">No alerts yet. Try “Simulate a day”.</p>';
+ $('badge').textContent=S.alerts.length?'('+S.alerts.length+')':'';
+ $('topList').innerHTML=topHtml(S.items.map(function(i){return{n:i.name,u:i.url,o:i.orig,c:i.cur,p:i.pct}}));
+ $('seedBtn').hidden=S.items.some(function(i){return i.example})}
+function rank(list){return list.slice().sort(function(a,b){return(a.c/(a.o*(1-a.p/100)))-(b.c/(b.o*(1-b.p/100)))})}
+function topHtml(list){if(!list.length)return'<li class="empty" style="display:block">No items yet.</li>';return rank(list).map(function(x){var it={orig:x.o,cur:x.c,pct:x.p},st=status(it);return'<li><div class="g"><b>'+esc(x.n)+'</b><div class="small">Target '+gbp(targetOf(it))+' (−'+x.p+'%) · now '+gbp(x.c)+' demo</div></div><span class="pill '+st[1]+'">'+st[0]+'</span></li>'}).join('')}
+$('cards').onclick=function(e){var b=e.target.closest('button');if(!b)return;var id=b.closest('.card').dataset.id,it=S.items.find(function(x){return x.id==id});
+ if(b.dataset.a=='del'){if(confirm('Delete “'+it.name+'”?')){S.items=S.items.filter(function(x){return x.id!=id});save();render()}}
+ else{editing=id;$('what').value=it.url||it.name;$('nameWrap').hidden=!it.url;$('name').value=it.name;$('name')._touched=true;$('price').value=it.orig;$('pct').value=it.pct;setMode('pct');$('formTitle').textContent='Edit item';$('submitBtn').textContent='Save changes';$('cancelEdit').hidden=false;$('what').scrollIntoView({behavior:'smooth'});$('what').focus()}};
+$('simBtn').onclick=simulate;var timer;$('auto').onchange=function(){clearInterval(timer);if(this.checked)timer=setInterval(simulate,2000)};
+$('seedBtn').onclick=function(){if(S.items.length+3>MAX){msg($('msg'),'Not enough room for 3 examples (10 max).','warn');return}seed();save();render()};
+$('clearBtn').onclick=function(){if(confirm('Remove all items and alerts?')){S.items=[];S.alerts=[];save();render()}};
+$('clearAlerts').onclick=function(){S.alerts=[];save();render()};
+// tabs
+$('tabs').onclick=function(e){var b=e.target.closest('button');if(!b)return;[].forEach.call(this.children,function(x){x.setAttribute('aria-selected',x==b);$('tab-'+x.dataset.t).hidden=x!=b});scrollTo(0,0)};
+// share
+function enc(list){return btoa(unescape(encodeURIComponent(JSON.stringify({v:1,i:list})))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function dec(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return JSON.parse(decodeURIComponent(escape(atob(s)))).i}
+function shareUrl(){var l=rank(S.items.map(function(i){return{n:i.name,u:i.url,o:i.orig,c:i.cur,p:i.pct}}));return location.href.split('#')[0]+'#list='+enc(l)}
+WD.shareUrl=shareUrl;WD.decode=dec;
+$('copyBtn').onclick=function(){if(!S.items.length){msg($('shareMsg'),'Add an item first.','warn');return}var u=shareUrl();history.replaceState(null,'','#'+u.split('#')[1]);
+ var done=function(){msg($('shareMsg'),'Link copied ✓ Anyone with it sees a read-only list.','good')};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(u).then(done,function(){fallback(u)});else fallback(u);
+ function fallback(u){var t=document.createElement('textarea');t.value=u;document.body.appendChild(t);t.select();try{document.execCommand('copy');done()}catch(e){prompt('Copy this link:',u)}t.remove()}};
+if(navigator.share){$('shareBtn').hidden=false;$('shareBtn').onclick=function(){navigator.share({title:'My Wishlist Drop Top 10',text:'My wishlist (demo prices)',url:shareUrl()}).catch(function(){})}}
+var shared=null;
+function route(){var m=location.hash.match(/#list=([\w-]+)/);shared=null;if(m){try{shared=dec(m[1])}catch(e){}}
+ $('roView').hidden=!shared;$('app').hidden=!!shared;$('tabs').hidden=!!shared;if(shared){$('roTitle').textContent='Top '+shared.length;$('roList').innerHTML=topHtml(shared)}}
+$('exitRo').onclick=function(){history.replaceState(null,'',location.pathname+location.search);route()};
+$('importBtn').onclick=function(){var room=MAX-S.items.length,add=shared.slice(0,room);add.forEach(function(x){var n=mk(x.n,x.u,x.o,x.p);n.cur=x.c;n.hist=[x.o,x.c];checkHit(n);S.items.push(n)});save();$('exitRo').onclick();render();if(add.length<shared.length)msg($('msg'),'Imported '+add.length+' (10-item limit).','warn')};
+addEventListener('hashchange',route);
+load();if(!S.seeded&&!S.items.length){seed();save()}render();route();
+})();
+</script></body></html>
