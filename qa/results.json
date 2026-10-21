@@ -349,7 +349,7 @@
  },
  {
   "id": "TH2",
-  "name": "Theme switcher: changes theme live, persists in localStorage, survives reload; URL param wins over stored choice",
+  "name": "Theme picker hidden on plain default URL; shown with ?theme=; switches live, persists, survives reload; URL param wins",
   "ok": true,
   "note": ""
  },
@@ -357,7 +357,7 @@
   "id": "TH3",
   "name": "Share card follows the theme (canvas colours differ per theme)",
   "ok": true,
-  "note": "{\"default\":\"78,48,225\",\"drop\":\"255,102,0\",\"clean\":\"250,250,248\",\"hybrid\":\"250,250,248\"}"
+  "note": "{\"default\":\"250,250,250\",\"drop\":\"255,102,0\",\"clean\":\"250,250,248\",\"hybrid\":\"250,250,248\"}"
  },
  {
   "id": "TH4",

@@ -113,3 +113,13 @@ Tests: qa/qa.js now has 58 cases, and build/test.js uses a dialog hook (`window.
 New tests: TH1 (each param applies, invalid → default, DEMO banner visible), TH2 (switcher, persistence, URL precedence), TH3 (share card follows the theme), TH4 (axe WCAG AA + colour-contrast per theme on watch/alerts/top 10 + card/dialog/read-only). Results are in `qa/themes-contrast.txt`: 0 contrast failures in all 4 themes.
 Orange on white: #FF6600 is used only as a background, with black text (7.2:1). Small orange text uses #B34700 (5.5:1). #E55A00 (3.6:1) is used only for large headings and UI fills (≥3:1). Note that the brief's #E55A00 alone is **not** AA for small text.
 Screenshots: `themes/{default,drop,clean,hybrid}-{watch,alerts,top10,sharecard}.png`.
+
+## Purple-clean default (2026-10-21)
+The default theme was reworked to match clean's restraint, with purple #5b3df5 as the only accent (6.1:1 on white). Small purple text uses #4a2fd6.
+- Off-white #fafafa background, 1px borders and no shadows, 10px radius.
+- Purple fills only on the primary buttons, the active tab, and the "At target" and "below reference" badges. The Simulate button is outlined.
+- Calmer weights (500/600/700) and a muted yellow DEMO banner.
+- The text wordmark "Wishlist **Drop**" is in the header and on the share card.
+- **Theme picker:** hidden on the plain default URL. It shows only when `?theme=` is present or a non-default theme is stored.
+
+TH2 was updated to cover this. Tests: qa.js 62/62, build/test.js 23/23. axe contrast: 0 failures in all 4 themes (`qa/themes-contrast.txt`). Screenshots: `themes/purple-clean-{watch,alerts,top10,sharecard}.png`.
