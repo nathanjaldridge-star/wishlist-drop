@@ -107,3 +107,9 @@ Real iOS Safari / Android devices, VoiceOver/TalkBack (only labels and axe were 
 | U5 | Silent data loss without localStorage | Storage probe on boot plus a warning on save failure (visible alert banner). | L7 |
 | U6 | Auto-simulate not remembered | Stored in state and restored on load. | P1 |
 Tests: qa/qa.js now has 58 cases, and build/test.js uses a dialog hook (`window.WD_DIALOG_HOOK`, test-only) in place of native dialog handlers.
+
+## Themes (2026-10-21)
+`?theme=default|drop|clean|hybrid` plus a header switcher. The choice is saved in localStorage (`wishlistDrop.theme`), and a URL param wins over the stored value. Everything runs off CSS variables. Fonts (Archivo/Inter) come from Google Fonts, loaded non-blocking only for the non-default themes, with a system-font fallback offline.
+New tests: TH1 (each param applies, invalid → default, DEMO banner visible), TH2 (switcher, persistence, URL precedence), TH3 (share card follows the theme), TH4 (axe WCAG AA + colour-contrast per theme on watch/alerts/top 10 + card/dialog/read-only). Results are in `qa/themes-contrast.txt`: 0 contrast failures in all 4 themes.
+Orange on white: #FF6600 is used only as a background, with black text (7.2:1). Small orange text uses #B34700 (5.5:1). #E55A00 (3.6:1) is used only for large headings and UI fills (≥3:1). Note that the brief's #E55A00 alone is **not** AA for small text.
+Screenshots: `themes/{default,drop,clean,hybrid}-{watch,alerts,top10,sharecard}.png`.

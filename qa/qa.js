@@ -9,7 +9,7 @@ async function page(o={}){const ctx=await b.newContext({viewport:o.vp||{width:39
  await p.exposeFunction('__xss',()=>{p.xss=true});
  if(!o.noHook)await p.exposeFunction('WD_DIALOG_HOOK',(m,t)=>{p.dialogs.push(m);if(/xss/i.test(m))p.xss=true;return t=='prompt'?(p.ans??''):true});
  p.on('dialog',d=>{p.dialogs.push(d.message());if(/xss/i.test(d.message()))p.xss=true;d.accept(d.type()=='prompt'?(p.ans??''):undefined)});
- await p.goto(URL0+(o.hash||''));if(o.wait!==false)await p.waitForSelector('html[data-ready="1"]',{timeout:15000}).catch(()=>{});return p}
+ await p.goto(URL0+(o.q||'')+(o.hash||''));if(o.wait!==false)await p.waitForSelector('html[data-ready="1"]',{timeout:15000}).catch(()=>{});return p}
 const S=p=>p.evaluate(()=>WD.state());
 async function add(p,what,price,o={}){await p.fill('#what',what);if(o.name!=null){await p.fill('#name',o.name)}await p.fill('#price',price==null?'':String(price));
  if(o.abs!=null){await p.click('#modeAbs');await p.fill('#abs',String(o.abs))}else if(o.pct!=null){await p.click('#modePct');await p.fill('#pct',String(o.pct))}
@@ -89,6 +89,30 @@ await T('L7','localStorage unavailable → visible warning, app still works',asy
 await T('P1','Auto-simulate setting remembered across reload',async()=>{const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.addInitScript(()=>{window.WD_SKIP_LIVE=true});const q=await ctx.newPage();await q.goto(URL0);await q.waitForSelector('html[data-ready="1"]');
  await q.check('#auto');await q.reload();await q.waitForSelector('html[data-ready="1"]');ok(await q.isChecked('#auto'),'not remembered');const h0=(await S(q)).items[1].hist.length;await q.waitForTimeout(2300);ok((await S(q)).items[1].hist.length>h0,'not running');
  await q.uncheck('#auto');await q.reload();await q.waitForSelector('html[data-ready="1"]');ok(!(await q.isChecked('#auto')));await ctx.close()});
+const THEMES=['default','drop','clean','hybrid'];
+await T('TH1','Each ?theme= value applies (data-theme + CSS vars), invalid value → default, DEMO banner visible',async()=>{const seen={};for(const t of THEMES.concat(['bogus'])){const q=await page({q:'?theme='+t});const r=await q.evaluate(()=>({a:document.documentElement.getAttribute('data-theme')||'default',cta:getComputedStyle(document.querySelector('#submitBtn')).backgroundColor,sel:document.getElementById('themeSel').value,demo:getComputedStyle(document.querySelector('.demo')).display!=='none'&&document.querySelector('.demo').getBoundingClientRect().height>20}));
+ const exp=t==='bogus'?'default':t;ok(r.a===exp&&r.sel===exp,t+' → '+r.a+'/'+r.sel);ok(r.demo,'demo banner hidden in '+t);seen[t]=r.cta;ok(!q.errs.length,q.errs.join('|'));await q.context().close()}
+ ok(new Set(THEMES.map(t=>seen[t])).size===3,'CTA colours not distinct: '+JSON.stringify(seen));ok(seen.drop==='rgb(255, 102, 0)'&&seen.hybrid==='rgb(255, 102, 0)'&&seen.clean==='rgb(17, 17, 17)'&&seen.default==='rgb(91, 61, 245)',JSON.stringify(seen));return JSON.stringify(seen)});
+await T('TH2','Theme switcher: changes theme live, persists in localStorage, survives reload; URL param wins over stored choice',async()=>{const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.addInitScript(()=>{window.WD_SKIP_LIVE=true});const q=await ctx.newPage();const errs=[];q.on('pageerror',e=>errs.push(e.message));
+ await q.goto(URL0);await q.waitForSelector('html[data-ready="1"]');ok(await q.evaluate(()=>!document.documentElement.hasAttribute('data-theme')),'default not purple');
+ await q.selectOption('#themeSel','clean');ok(await q.evaluate(()=>document.documentElement.dataset.theme)=='clean');ok(await q.evaluate(()=>localStorage.getItem('wishlistDrop.theme'))=='clean','not persisted');
+ await q.reload();await q.waitForSelector('html[data-ready="1"]');ok(await q.evaluate(()=>document.documentElement.dataset.theme)=='clean','not restored');
+ await q.goto(URL0+'?theme=drop');await q.waitForSelector('html[data-ready="1"]');ok(await q.evaluate(()=>document.documentElement.dataset.theme)=='drop','URL did not win');ok(await q.inputValue('#themeSel')=='drop');
+ await q.selectOption('#themeSel','hybrid');ok(await q.evaluate(()=>location.search)=='?theme=hybrid','URL not updated: '+await q.evaluate(()=>location.search));ok(await q.evaluate(()=>localStorage.getItem('wishlistDrop.theme'))=='hybrid');
+ await q.selectOption('#themeSel','default');ok(await q.evaluate(()=>!document.documentElement.hasAttribute('data-theme')&&location.search===''));ok(!errs.length,errs.join('|'));await ctx.close()});
+await T('TH3','Share card follows the theme (canvas colours differ per theme)',async()=>{const px={};for(const t of THEMES){const q=await page({q:'?theme='+t});await q.evaluate(()=>document.fonts&&document.fonts.ready);px[t]=await q.evaluate(()=>{const c=WD.drawCard();const d=c.getContext('2d').getImageData(30,60,1,1).data;return d[0]+','+d[1]+','+d[2]});await q.context().close()}
+ ok(new Set(Object.values(px)).size>=3,JSON.stringify(px));ok(px.drop==='255,102,0',JSON.stringify(px));return JSON.stringify(px)});
+await T('TH4','axe-core colour contrast + WCAG AA per theme (watch w/ all statuses + error panel, alerts, top 10 + card, read-only, dialog)',async()=>{const axe=fs.readFileSync('/tmp/wdt/node_modules/axe-core/axe.min.js','utf8');const rep=[];let bad=[];
+ for(const t of THEMES){const q=await page({q:'?theme='+t,noHook:true});await q.evaluate(()=>document.fonts&&document.fonts.ready);await add(q,'Contrast kettle',10);
+  for(let i=0;i<25;i++)await q.click('#simBtn');await q.evaluate(()=>document.querySelector('details').open=true);await q.click('button[data-err=changed]');await q.waitForTimeout(80);
+  const run=async(where)=>{await q.addScriptTag({content:axe});const r=await q.evaluate(()=>axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21aa']}));const cc=r.violations.filter(v=>v.id==='color-contrast');const n=cc.reduce((a,v)=>a+v.nodes.length,0);
+   const chk=(r.passes.find(v=>v.id==='color-contrast')||{nodes:[]}).nodes.length;rep.push(t+' '+where+': contrast pass nodes '+chk+', fail '+n+(r.violations.length?' | violations: '+r.violations.map(v=>v.id+'('+v.impact+')×'+v.nodes.length).join(','):''));
+   r.violations.filter(v=>/serious|critical/.test(v.impact)).forEach(v=>bad.push(t+' '+where+' '+v.id+' '+v.nodes.map(x=>x.target.join(' ')+' '+(x.any[0]&&x.any[0].message||'')).slice(0,3).join(' ; ')))};
+  await run('watch');await q.click('button[data-err=ok]');await q.click('[data-t=alerts]');await run('alerts');await q.click('[data-t=share]');await q.click('#cardBtn');await q.waitForSelector('#card:not([hidden])');await run('share');
+  await q.click('[data-t=watch]');await q.click('#clearBtn');await run('dialog');await q.click('#dlgCancel');
+  const su=await q.evaluate(()=>WD.shareUrl());await q.goto(su);await q.waitForSelector('#roView:not([hidden])');await run('read-only');
+  ok(!q.errs.length,q.errs.join('|'));await q.context().close()}
+ fs.writeFileSync(Q+'themes-contrast.txt',rep.join('\n')+'\n');ok(!bad.length,bad.join(' || '));return 'see qa/themes-contrast.txt'});
 await T('E1','No JS errors in main session',async()=>{ok(!p.errs.length,p.errs.join(' | '))});
 await b.close();fs.writeFileSync(Q+'results.json',JSON.stringify(res,null,1));
 for(const r of res)console.log((r.ok?'PASS':'FAIL')+' '+r.id+' '+r.name+(r.note?' — '+r.note:''));console.log(res.filter(r=>r.ok).length+'/'+res.length+' passed')})();

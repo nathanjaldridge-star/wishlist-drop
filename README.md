@@ -6,6 +6,19 @@ Make a 10-item wishlist. Wishlist Drop checks each item across retailers and sou
 
 <img src="screenshots/screenshot.png" width="260"> <img src="screenshots/share-card.png" width="260"> <img src="screenshots/screenshot-shared.png" width="260">
 
+## Themes
+Add `?theme=` to the URL, or use the **Theme** picker in the header. Your choice is remembered, and the URL wins over the remembered choice.
+| Theme | Look | Live |
+|---|---|---|
+| default | Purple (original) | https://nathanjaldridge-star.github.io/wishlist-drop/ |
+| drop | Bright orange #FF6600 / black / white, Archivo 800–900, tight 6–8px corners, big prices, "DROPPED 18%" badges, black tab bar | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=drop |
+| clean | Off-white, near-black text, single green accent #0A7F4F, thin borders, Inter 500/700 | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=clean |
+| hybrid | Clean layout, orange only for CTAs, drop badges and "at target" | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=hybrid |
+
+<img src="themes/drop-watch.png" width="200"> <img src="themes/clean-watch.png" width="200"> <img src="themes/hybrid-top10.png" width="200"> <img src="themes/drop-sharecard.png" width="200">
+
+The DEMO banner and labels show in every theme. All four themes pass an axe-core WCAG AA scan with no colour-contrast failures (`qa/themes-contrast.txt`). White text never sits on #FF6600 (2.9:1). Black is used instead, and small orange text is #B34700. The share card PNG follows the theme. Fonts load from Google Fonts (free) without blocking the page, with system fonts offline.
+
 ## ⚠️ Data labels: please read
 - **DEMO prices are simulated, not real.** Items on the DEMO source (including "DEMO Amazon UK" and "DEMO Argos") follow a random walk. The banner and tags say so everywhere.
 - **HotUKDeals data is community reported.** Prices and codes come from user posts on the public HotUKDeals RSS feed and are unverified. Codes are only taken from a post's description text, never generated.
