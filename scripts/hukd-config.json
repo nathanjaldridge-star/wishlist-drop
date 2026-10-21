@@ -1,0 +1,16 @@
+{
+  "_note": "Mirror config for scripts/fetch-hukd.mjs. Only public HotUKDeals RSS feeds (robots.txt allows /rss/). No retailer pages are fetched.",
+  "base": "https://www.hotukdeals.com",
+  "feeds": [
+    { "name": "new",      "path": "/rss/new",      "every_min": 5,  "bf_every_min": 2 },
+    { "name": "trending", "path": "/rss/hot",      "every_min": 15, "bf_every_min": 15 },
+    { "name": "vouchers", "path": "/rss/vouchers", "every_min": 30, "bf_every_min": 30 }
+  ],
+  "tags": ["lego", "headphones", "apple", "gaming"],
+  "tag_every_min": 30,
+  "_merchants_note": "Deals are kept only if pepper:merchant@name matches one of these (case/punctuation-insensitive prefix). Launch focus from the plan (sec. 4) plus merchants seen in the feeds this month.",
+  "merchants": ["Amazon", "Argos", "Currys", "John Lewis", "Boots", "AO", "Very", "eBay", "Screwfix", "Halfords", "Uniqlo", "Overclockers"],
+  "retain_days": 7,
+  "max_deals": 3000,
+  "bf_week": { "from": "11-20", "to": "12-01", "tz": "Europe/London" }
+}

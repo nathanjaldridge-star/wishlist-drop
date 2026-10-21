@@ -3,7 +3,7 @@
 
 **Live:** https://nathanjaldridge-star.github.io/wishlist-drop/
 
-Drop Club tracks up to 10 drops. It checks each one across sources, shows the **cheapest price found and the % below your reference**, and alerts you when a drop is **10% or more below its reference** or hits your target. **Beta, no sign-up.**
+Drop Club tracks up to 10 drops. It checks each one across sources, shows the **cheapest price found**, and alerts you when a price is **10% or more below the lowest we've seen at that retailer in the last 30 days**, or hits your own target. **Beta, no sign-up.**
 
 <img src="themes/dropclub-public-header.png" width="200"> <img src="themes/dropclub-public-drops.png" width="200"> <img src="themes/dropclub-public-nolive.png" width="200"> <img src="themes/dropclub-public-top10.png" width="200">
 
@@ -13,10 +13,15 @@ Drop Club tracks up to 10 drops. It checks each one across sources, shows the **
 - **Old data:** opening the public URL with older DEMO data in `wishlistDrop.v2` removes the example items, drops all simulated prices, offers and alerts, keeps your item names, links and entered prices, and turns auto-simulate off.
 - **Invariant, tested:** a visitor never sees an unlabelled fake price. `qa.js` PB1 walks every visible `£` price on Drops, Alerts, Top 10 and the read-only view and fails if it has no source badge, or (for observed prices) no checked-at time. PB3 confirms `?demo=1` still labels everything DEMO.
 
-## Reference price (honest % off)
-- **Reference = median of observed prices** once there are ≥4 observations spanning ≥28 days (within the last 90 days). The basis is shown, e.g. "median of 6 observed prices over 35 days".
-- Until then, the **reference is the price when added**: what you typed, shown as "price when added (you entered on 21 Oct). Not a verified RRP."
-- % off, the target, "Dropped/At target" and the ≥10% alert are all computed against that reference. Drop Club never calls your number a verified RRP.
+## Baseline: lowest price seen in 30 days (plan: launch-bf-plan.md §2)
+- **Baseline = the lowest price we observed in the prior 30 days at the same retailer.** RRP, retailer "was" prices and the price you typed are never used for drop maths.
+- A **drop** is `current ≤ baseline × 0.90`, and a **strong drop** is `≤ 0.80`. With no earlier price there's no drop maths: the card says "No price history yet".
+- **Alerts say "Reported deal (community reported)"** until the item has 30 days of history. They're phrased "below the lowest we've seen there since <first-seen date>", never "lowest price". After 30 days they say "Price drop … in the last 30 days". DEMO alerts say DEMO, and your own prices say "entered by you".
+- Your entered price only sets **your target** (10–20% below it). It's labelled as your own goal, not a verified RRP.
+- **Prices are logged from day one:** in the browser (`item.obs`, every price per retailer) and on the server (append-only `price-log.jsonl` on the `data` branch, written by the mirror).
+- **Deal freshness:** a HotUKDeals deal is **stale after 48h**, or **24h in Black Friday week (20 Nov–1 Dec, Europe/London)**, unless it's re-seen in trending. Stale matches give no price, and the card says why.
+- **Vouchers and codes are never called "working".** They show as "Reported voucher … Unverified: it may not apply" or "Code posted by the community 2h ago (unverified, may not apply)".
+- **Every HotUKDeals item links back to its thread:** deal box, voucher box, alerts, Top 10 and the shared view.
 
 ## Themes
 Add `?theme=` to the URL. The **Theme** picker appears in the header only when `?theme=` is present or a non-default theme is saved. Your choice is remembered, and the URL wins over the remembered choice.
@@ -46,7 +51,7 @@ The Beta notice (public) or DEMO banner (`?demo=1`) and the source labels show i
 - **DEMO prices are simulated, not real, and only exist at `?demo=1`.** Items on the DEMO source (including "DEMO Amazon UK" and "DEMO Argos") follow a random walk. The banner and tags say so everywhere.
 - **HotUKDeals data is community reported.** Prices and codes come from user posts on the public HotUKDeals RSS feed and are unverified. Codes are only taken from a post's description text, never generated.
 - **Entered by you:** prices you type are labelled as yours, never as a verified RRP.
-- The demo's example items are labelled "(example)". The Levi's reference price (£90) is made up.
+- The demo's example items are labelled "(example)". The Levi's entered price (£90) is made up.
 
 ## Features
 - Add an item by pasting a link or typing a name (a link gets a readable name). Price is optional, and you're prompted if it's blank. Set the target as % off or as a £ price.
@@ -65,7 +70,7 @@ Every source is an adapter: `getPrice(item) → Promise<record>`, plus an option
 | Manual | on | Your own price, labelled "entered by you" |
 | Awin feed / Awin promotions / Keepa | **awaiting approval** | Disabled stubs that return `blocked` |
 
-**HotUKDeals loading order:** on https, `./data/hukd.json` (a same-origin mirror, so no CORS), then the live feed (usually CORS-blocked), then the embedded snapshot (2026-10-17). The mirror is refreshed every 30 minutes by [`docs/workflows/hukd-mirror.yml`](docs/workflows/hukd-mirror.yml) (**pending: move it to `.github/workflows/` to activate**; the deploy token lacked the `workflow` scope), which runs [`scripts/fetch-hukd.mjs`](scripts/fetch-hukd.mjs).
+**HotUKDeals loading order** (on https): the `data` branch mirror via raw.githubusercontent.com (CORS `*`, about 5 min cache), then `./data/hukd.json` on main (a fallback copy, which goes stale), then the embedded snapshot (2026-10-17). Offline/`file://` uses the snapshot.
 
 ## Christmas mode
 A seasonal look for the Drop Club default: a black/orange jingle bell on the D mark, "MY CHRISTMAS DROPS" / "Your Top 10 Christmas list" framing, and a Christmas share card. The palette is unchanged and there is no snow.
@@ -78,14 +83,25 @@ A seasonal look for the Drop Club default: a black/orange jingle bell on the D m
 ## Repo layout
 - `index.html`: the whole app (self-contained, also works offline from `file://`), built from `build/src.html` with `build/hukd_sample.xml` injected at `%%HUKD%%`.
 - `build/test.js`: headless test (playwright-core + system Chrome, ajv schema validation). Run `npm i playwright-core ajv ajv-formats && node build/test.js` (it uses absolute paths from the dev box; adjust `D`).
-- `scripts/fetch-hukd.mjs`: the mirror fetcher. It sends a conditional GET (If-None-Match/If-Modified-Since from the last mirror; a 304 means no write and no commit), has a 15s timeout with one retry, and validates before writing: complete RSS, ≥5 items with title and link, size limits, and no sudden collapse in item count. A bad feed keeps the previous mirror. Writes are atomic, and upstream problems produce warnings, not failures. `scripts/test-fetch-hukd.mjs` tests it offline against a local server. Note: HotUKDeals currently sends no ETag or Last-Modified, so unchanged feeds are detected by content comparison.
-- `docs/workflows/hukd-mirror.yml`: the 30-minute mirror workflow, **ready to move** to `.github/workflows/`. It needs a token with the `workflow` scope, or the GitHub web UI. It self-tests the fetcher, fetches, commits only on change, and requests a Pages rebuild.
-- `data/hukd.json`: the RSS mirror. `docs/`: the price contract. `themes/`: current Drop Club screenshots.
+- `scripts/fetch-hukd.mjs` + `scripts/hukd-config.json`: the mirror. It fetches **only public HUKD RSS**: `/rss/new`, `/rss/hot` (trending), `/rss/vouchers` and `/rss/tag/{lego,headphones,apple,gaming}`. It never fetches retailer pages, so there's no server-side scraping.
+  - **Merchant filter:** keeps only deals whose `pepper:merchant` is one of Amazon, Argos, Currys, John Lewis, Boots, AO, Very, eBay, Screwfix, Halfords, Uniqlo or Overclockers.
+  - **What's stored:** title, thread link, merchant, price/discount, pubDate, temperature and code strings only. No description HTML.
+  - **Dedupe:** by `guid`, plus cross-posts (merchant + title + price within 48h, keeping the hottest thread).
+  - **Retention:** deals are kept for 7 days.
+  - **Per-feed cadence:** new 5 min (2 min in BF week), trending 15 min, vouchers and tags 30 min.
+  - **Robustness:** conditional GET (HUKD currently sends no ETag or Last-Modified), 15s timeout, one retry on 5xx/429, validation, keep-previous on failure, atomic writes, and an overflow warning when every `/rss/new` item is unseen.
+  - **Price log:** appends `price-log.jsonl`.
+  - **Tests:** `scripts/test-fetch-hukd.mjs` (18 offline checks).
+- `docs/workflows/hukd-mirror.yml`: **ready to move** to `.github/workflows/` (needs the `workflow` token scope or the web UI).
+  - Runs every 5 min (`*/5`, GitHub's minimum; runs can be late or skipped), self-tests, fetches due feeds and commits to the **`data` branch**.
+  - Kept off main so Pages isn't rebuilt every 5 min (soft limit about 10/hour).
+  - **2-minute polling in BF week isn't possible on GitHub.** The proposal is Cloudflare Workers Cron (`docs/cloudflare-worker-cron.md`). It's a free sign-up, so it needs Nathan's approval.
+- `data/hukd.json`: fallback copy of the mirror (v2). The live mirror and the append-only price log are on the `data` branch. `docs/`: the price contract. `themes/`: current Drop Club screenshots.
 
 ## Limitations
 - In-browser alerts only, and only while the page is open. There's no email or push yet (see roadmap).
 - No real retailer prices yet. HotUKDeals only covers items someone has posted. Fuzzy matching can mis-match (confidence is shown).
-- The 28-day median only kicks in once a browser has collected enough observations. History is per browser until there's a backend.
+- History is per browser plus the server price log. The app doesn't read the server log yet; the next step is to compute a shared 30-day low per merchant and title from it. Until we have 30 days, alerts are labelled "Reported deal".
 - The share link carries a snapshot of the prices at the moment you copied it.
 
 ## Roadmap: a real site on free tiers (no paid sign-ups)
