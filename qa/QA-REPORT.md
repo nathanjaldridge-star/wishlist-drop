@@ -136,3 +136,12 @@ The config is in `build/src.html` → `var AFFILIATE = { amazonUK: { tag: '' }, 
 - **Non-Amazon hooks:** Skimlinks, Sovrn and Awin are in `RETAILER_HOOKS`, all disabled.
 
 Tests: AF1 (15 URL cases), AF2 (tag set: cards/alerts/shared view, existing tag kept, item link untouched, non-Amazon gets no button), AF3 (empty tag + short link), AF4 (hooks only when enabled). TH4 now includes a tagged Buy button and Ad label in every theme, with 0 contrast failures.
+
+## Rebrand: Drop Club (2026-10-21)
+- **New default:** black and orange on off-white #FAF9F6, with the orange "D" mark, the DROP CLUB wordmark and the tagline "EXCLUSIVE DROPS. REAL VALUE.".
+- **Copy:** "Add new drop", "Your Drops", and drop cards showing Price (large), RRP, % off and Target.
+- **Pills:** At Target is orange with black text, Dropped is black with orange text, and Watching is white with black text.
+- **Monochrome UI:** the UI emoji were replaced with monochrome SVG icons, and the multi-colour accents (blue community tag, blue deal box, red/yellow error states, purple sparkline) were moved into the palette.
+- **Old looks:** only via `?theme=purple|drop|clean|hybrid`.
+- **Storage:** localStorage key `wishlistDrop.v2` is unchanged, so existing data is kept. The theme preference key changed to `dropClub.theme` so every returning visitor sees the new default.
+- **New tests:** DC1 (brand, meta/OG, copy) and DC2 (palette audit of all screens, the share card pixels and the sparkline). TH1–TH4 were updated for 5 themes. Results: qa.js 68/68, build/test.js 23/23, axe contrast 0 failures on 25 screens (5 themes × 5).

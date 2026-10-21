@@ -1,26 +1,28 @@
-# Wishlist Drop
+# Drop Club
+**EXCLUSIVE DROPS. REAL VALUE.**
 
 **Live:** https://nathanjaldridge-star.github.io/wishlist-drop/
 
-Make a 10-item wishlist. Wishlist Drop checks each item across retailers and sources, shows the **cheapest retailer and how far below your reference price it is**, and alerts you when an item is **10% or more below** the reference, or hits your own target (10–20%, default 15%). No sign-up: everything is saved in your browser.
+Drop Club tracks up to 10 drops. It checks each one across retailers and sources, shows the **cheapest retailer and the % off RRP** (RRP is the reference price you enter), and alerts you when a drop is **10% or more below RRP** or hits your own target (10–20%, default 15%). No sign-up: everything is saved in your browser.
 
-<img src="themes/purple-clean-watch.png" width="260"> <img src="themes/purple-clean-sharecard.png" width="260"> <img src="screenshots/screenshot-shared.png" width="260">
+<img src="themes/dropclub-header-add.png" width="200"> <img src="themes/dropclub-drops.png" width="200"> <img src="themes/dropclub-top10.png" width="200"> <img src="themes/dropclub-sharecard.png" width="200">
 
 ## Themes
 Add `?theme=` to the URL. The **Theme** picker appears in the header only when `?theme=` is present or a non-default theme is saved. Your choice is remembered, and the URL wins over the remembered choice.
 | Theme | Look | Live |
 |---|---|---|
-| default | Purple-clean: off-white, thin borders, purple as the only accent, "Wishlist **Drop**" wordmark (no theme picker on the plain URL) | https://nathanjaldridge-star.github.io/wishlist-drop/ |
+| default | **Drop Club**: black + #FF6600 on off-white, orange D mark, DROP CLUB wordmark, large prices, orange/black pills only | https://nathanjaldridge-star.github.io/wishlist-drop/ |
+| purple | The previous purple-clean default | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=purple |
 | drop | Bright orange #FF6600 / black / white, Archivo 800–900, tight 6–8px corners, big prices, "DROPPED 18%" badges, black tab bar | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=drop |
 | clean | Off-white, near-black text, single green accent #0A7F4F, thin borders, Inter 500/700 | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=clean |
 | hybrid | Clean layout, orange only for CTAs, drop badges and "at target" | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=hybrid |
 
 <img src="themes/purple-clean-watch.png" width="200"> <img src="themes/drop-watch.png" width="200"> <img src="themes/clean-watch.png" width="200"> <img src="themes/hybrid-top10.png" width="200"> <img src="themes/drop-sharecard.png" width="200">
 
-The DEMO banner and labels show in every theme. All four themes pass an axe-core WCAG AA scan with no colour-contrast failures (`qa/themes-contrast.txt`). White text never sits on #FF6600 (2.9:1). Black is used instead, and small orange text is #B34700. The share card PNG follows the theme. Fonts load from Google Fonts (free) without blocking the page, with system fonts offline.
+The DEMO banner and labels show in every theme. All five themes pass an axe-core WCAG AA scan with no colour-contrast failures (`qa/themes-contrast.txt`). White text never sits on #FF6600 (2.9:1). Black is used instead, and small orange text is #B34700. The share card PNG follows the theme. Fonts load from Google Fonts (free) without blocking the page, with system fonts offline.
 
 ## Affiliate links & disclosure
-**As an Amazon Associate we earn from qualifying purchases.** Links marked **Ad** are affiliate links, and we may earn a commission at no extra cost to you.
+**Drop Club is a participant in the Amazon Associates Programme. As an Amazon Associate we earn from qualifying purchases.** Links marked **Ad** are affiliate links, and we may earn a commission at no extra cost to you.
 
 - **Where the tag goes:** `build/src.html`, in the `var AFFILIATE = {...}` block under "Affiliate links". Set `amazonUK: { tag: 'yourtag-21' }`, then run `node build/build.js` to regenerate `index.html`. While the tag is empty, links stay untagged. A console message says "affiliate tag not set", and the footer dev note is visible only with `?debug=1`.
 - **Only the Buy button is tagged:** the "Buy on Amazon" button (item cards, alerts, Top 10, shared view) is the only thing tagged. It points to `https://www.amazon.co.uk/dp/ASIN?tag=…`, with tracking parameters stripped, `rel="sponsored noopener"` and a visible "Ad" label.

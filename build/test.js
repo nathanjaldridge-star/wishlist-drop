@@ -52,7 +52,7 @@ await p.click('button[data-err=ok]');ok('error-state UI for not_found / blocked 
 // simulate → alert
 for(let i=0;i<80&&!(await S()).alerts.some(a=>/DEMO/.test(a.src)&&/target/.test(a.text));i++)await p.click('#simBtn');
 As.ok((await S()).alerts.some(a=>/DEMO/.test(a.src)&&/target/.test(a.text)));ok('simulation triggered a DEMO alert; alerts: '+(await S()).alerts.length);
-const pills=await p.$$eval('#cards .pill',e=>[...new Set(e.map(x=>x.textContent))]);As.ok((await S()).items.every(i=>i.offers&&i.offers.length>=1));As.ok(await p.isVisible('.cmp'));As.ok((await S()).alerts.some(a=>/below its reference/.test(a.text)));ok('≥10%-below-reference alert fired (cheapest retailer named)');ok('per-item cross-source comparison shows cheapest retailer + gap');ok('status pills seen: '+pills.join(', '));
+const pills=await p.$$eval('#cards .pill',e=>[...new Set(e.map(x=>x.textContent))]);As.ok((await S()).items.every(i=>i.offers&&i.offers.length>=1));As.ok(await p.isVisible('.cmp'));As.ok((await S()).alerts.some(a=>/below RRP/.test(a.text)));ok('≥10%-below-reference alert fired (cheapest retailer named)');ok('per-item cross-source comparison shows cheapest retailer + gap');ok('status pills seen: '+pills.join(', '));
 // share
 const su=await p.evaluate(()=>WD.shareUrl());const names=(await S()).items.map(i=>i.name).sort();
 const p2=await ctx.newPage();p2.on('pageerror',e=>errs.push(e.message));await p2.goto(su);await p2.waitForSelector('#roView:not([hidden])');
@@ -61,7 +61,7 @@ await p2.screenshot({path:D+'screenshot-shared.png'});
 await p.click('[data-t=alerts]');await p.screenshot({path:D+'screenshot-alerts.png'});
 await p.click('[data-t=share]');await p.click('#cardBtn');As.ok(await p.isVisible('#card'));
 const png=await p.evaluate(()=>WD.drawCard().toDataURL('image/png'));fs.writeFileSync(D+'share-card.png',Buffer.from(png.split(',')[1],'base64'));
-const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#dlBtn')]);As.equal(dl.suggestedFilename(),'wishlist-drop-top10.png');ok('share card drawn to canvas, PNG download fires (wishlist-drop-top10.png)');
+const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#dlBtn')]);As.equal(dl.suggestedFilename(),'drop-club-top10.png');ok('share card drawn to canvas, PNG download fires (drop-club-top10.png)');
 await p.screenshot({path:D+'screenshot-sharecard.png',fullPage:true});
 await p.click('[data-t=watch]');
 const small=await p.evaluate(()=>[...document.querySelectorAll('button,input:not([type=checkbox]),select,summary')].filter(e=>e.offsetParent&&e.getBoundingClientRect().height<44).map(e=>e.id||e.textContent));

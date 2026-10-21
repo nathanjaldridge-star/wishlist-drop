@@ -345,7 +345,7 @@
   "id": "TH1",
   "name": "Each ?theme= value applies (data-theme + CSS vars), invalid value → default, DEMO banner visible",
   "ok": true,
-  "note": "{\"default\":\"rgb(91, 61, 245)\",\"drop\":\"rgb(255, 102, 0)\",\"clean\":\"rgb(17, 17, 17)\",\"hybrid\":\"rgb(255, 102, 0)\",\"bogus\":\"rgb(91, 61, 245)\"}"
+  "note": "{\"default\":\"rgb(255, 102, 0)\",\"purple\":\"rgb(91, 61, 245)\",\"drop\":\"rgb(255, 102, 0)\",\"clean\":\"rgb(17, 17, 17)\",\"hybrid\":\"rgb(255, 102, 0)\",\"bogus\":\"rgb(255, 102, 0)\"}"
  },
  {
   "id": "TH2",
@@ -357,7 +357,7 @@
   "id": "TH3",
   "name": "Share card follows the theme (canvas colours differ per theme)",
   "ok": true,
-  "note": "{\"default\":\"250,250,250\",\"drop\":\"255,102,0\",\"clean\":\"250,250,248\",\"hybrid\":\"250,250,248\"}"
+  "note": "{\"default\":\"250,249,246\",\"purple\":\"250,250,250\",\"drop\":\"255,102,0\",\"clean\":\"250,250,248\",\"hybrid\":\"250,250,248\"}"
  },
  {
   "id": "TH4",
@@ -386,6 +386,18 @@
  {
   "id": "AF4",
   "name": "Hooks stay disabled unless explicitly enabled; enabling one wraps non-Amazon links (with Ad), Amazon logic unaffected",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "DC1",
+  "name": "Drop Club brand: title/OG/meta, D mark + DROP CLUB wordmark + tagline, no \"Wishlist Drop\" left in the UI, disclosure names Drop Club",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "DC2",
+  "name": "Default palette audit: only black/white/grey + orange (no blue, teal, purple, green, red) on drops, error states, deal box, alerts, Top 10 + card, read-only, dialog; pills orange or black only",
   "ok": true,
   "note": ""
  },
