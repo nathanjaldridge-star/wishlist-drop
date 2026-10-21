@@ -132,7 +132,7 @@ The config is in `build/src.html` → `var AFFILIATE = { amazonUK: { tag: '' }, 
 - **Short links:** amzn.to / amzn.eu are left untagged, with a note.
 - **Tagged links:** get `rel="sponsored noopener"` and a visible "Ad" label.
 - **Footer disclosure:** "As an Amazon Associate we earn from qualifying purchases."
-- **Empty tag:** links are untagged, and the footer shows a dev note "affiliate tag not set".
+- **Empty tag:** links are untagged, and a console message says "affiliate tag not set" (the visible dev note shows only with `?debug=1`).
 - **Non-Amazon hooks:** Skimlinks, Sovrn and Awin are in `RETAILER_HOOKS`, all disabled.
 
 Tests: AF1 (15 URL cases), AF2 (tag set: cards/alerts/shared view, existing tag kept, item link untouched, non-Amazon gets no button), AF3 (empty tag + short link), AF4 (hooks only when enabled). TH4 now includes a tagged Buy button and Ad label in every theme, with 0 contrast failures.

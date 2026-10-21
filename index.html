@@ -476,7 +476,7 @@ $('themeBox').hidden=!(hasThemeParam||curTheme()!=='default');
 $('themeSel').value=curTheme();$('themeSel').onchange=function(){setTheme(this.value,true)};
 WD.setTheme=setTheme;WD.theme=curTheme;
 
-$('devNote').hidden=!!String(AFFILIATE.amazonUK.tag||'').trim();if(!$('devNote').hidden&&window.console)console.info('[Wishlist Drop] affiliate tag not set: Amazon links are untagged.');
+var tagUnset=!String(AFFILIATE.amazonUK.tag||'').trim(),dbg=false;try{dbg=new URLSearchParams(location.search).get('debug')==='1'}catch(e){}$('devNote').hidden=!(tagUnset&&dbg);if(tagUnset&&window.console)console.info('[Wishlist Drop] affiliate tag not set: Amazon links are untagged.');
 WD.affiliate={config:AFFILIATE,parseAmazon:parseAmazon,buyLink:buyLink,stripTracking:stripTracking,hooks:RETAILER_HOOKS};
 
 /* ================= Boot ================= */

@@ -379,7 +379,7 @@
  },
  {
   "id": "AF3",
-  "name": "Tag empty (default): untagged canonical link, no Ad label, dev note \"affiliate tag not set\", disclosure shown; short links untagged with note",
+  "name": "Tag empty (default): untagged canonical link, no Ad label, dev note hidden from visitors (console log only; visible with ?debug=1), disclosure shown; short links untagged with note",
   "ok": true,
   "note": ""
  },

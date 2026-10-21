@@ -22,7 +22,7 @@ The DEMO banner and labels show in every theme. All four themes pass an axe-core
 ## Affiliate links & disclosure
 **As an Amazon Associate we earn from qualifying purchases.** Links marked **Ad** are affiliate links, and we may earn a commission at no extra cost to you.
 
-- **Where the tag goes:** `build/src.html`, in the `var AFFILIATE = {...}` block under "Affiliate links". Set `amazonUK: { tag: 'yourtag-21' }`, then run `node build/build.js` to regenerate `index.html`. While the tag is empty, links stay untagged and the footer shows "Dev note: affiliate tag not set".
+- **Where the tag goes:** `build/src.html`, in the `var AFFILIATE = {...}` block under "Affiliate links". Set `amazonUK: { tag: 'yourtag-21' }`, then run `node build/build.js` to regenerate `index.html`. While the tag is empty, links stay untagged. A console message says "affiliate tag not set", and the footer dev note is visible only with `?debug=1`.
 - **Only the Buy button is tagged:** the "Buy on Amazon" button (item cards, alerts, Top 10, shared view) is the only thing tagged. It points to `https://www.amazon.co.uk/dp/ASIN?tag=…`, with tracking parameters stripped, `rel="sponsored noopener"` and a visible "Ad" label.
 - **Never tagged:** the item's own link, anything opened automatically, links that already carry someone else's `tag=` (theirs is kept and ours isn't added), and amzn.to / amzn.eu short links (they can't be resolved in the browser).
 - **Other retailers:** Skimlinks, Sovrn and Awin deep-link hooks are in `RETAILER_HOOKS`. They're disabled (`enabled:false`) until those programmes approve the site.

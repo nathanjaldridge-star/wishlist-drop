@@ -150,12 +150,16 @@ await T('AF2','Tag set: Buy button → canonical /dp/ASIN?tag=, tracking strippe
  const su=await q.evaluate(()=>WD.shareUrl());await q.goto(su);await q.waitForSelector('#roView:not([hidden])');
  const ro=await q.evaluate(()=>[...document.querySelectorAll('#roList .buybtn')].map(b=>[b.getAttribute('href'),!!b.parentNode.querySelector('.ad'),b.rel]));ok(ro.length==2,'shared view buttons '+JSON.stringify(ro));ok(ro.some(x=>x[0].endsWith('?tag=nathantest-21')&&x[1]&&x[2]=='sponsored noopener'));ok(ro.some(x=>x[0].endsWith('?tag=someoneelse-21')&&!x[1]));
  await q.context().close()});
-await T('AF3','Tag empty (default): untagged canonical link, no Ad label, dev note "affiliate tag not set", disclosure shown; short links untagged with note',async()=>{const q=await page();await clear(q);
+await T('AF3','Tag empty (default): untagged canonical link, no Ad label, dev note hidden from visitors (console log only; visible with ?debug=1), disclosure shown; short links untagged with note',async()=>{const q=await page();await clear(q);
  await add(q,'https://www.amazon.co.uk/gp/product/B08N5WRWNW?utm_medium=email',99,{name:'Echo'});await add(q,'https://amzn.to/3xYzAbC',20,{name:'Short'});await q.waitForTimeout(100);
  const c=await q.evaluate(()=>[...document.querySelectorAll('#cards .card')].map(cd=>{const b=cd.querySelector('.buybtn');return{n:cd.querySelector('h3').textContent,href:b&&b.getAttribute('href'),title:b&&b.title,rel:b&&b.rel,ad:!!cd.querySelector('.buy .ad')}}));
  const e=c.find(x=>x.n=='Echo'),sh=c.find(x=>x.n=='Short');ok(e.href==='https://www.amazon.co.uk/dp/B08N5WRWNW'&&!e.ad&&e.rel=='noopener'&&e.title=='affiliate tag not set',JSON.stringify(e));
  ok(sh.href==='https://amzn.to/3xYzAbC'&&!sh.ad&&/cannot be resolved/.test(sh.title),JSON.stringify(sh));
- ok(await q.isVisible('#devNote'));ok(/affiliate tag not set/.test(await q.textContent('#devNote')));ok(await q.isVisible('#legal'));ok(!q.errs.length,q.errs.join('|'));await q.context().close()});
+ ok(!(await q.isVisible('#devNote')),'dev note visible to visitors');ok(await q.isVisible('#legal'));ok(!q.errs.length,q.errs.join('|'));await q.context().close();
+ const ctx=await b.newContext({viewport:{width:390,height:844}});await ctx.addInitScript(()=>{window.WD_SKIP_LIVE=true});const d=await ctx.newPage();const logs=[];d.on('console',m=>logs.push(m.type()+': '+m.text()));
+ await d.goto(URL0);await d.waitForSelector('html[data-ready="1"]');ok(!(await d.isVisible('#devNote')));ok(logs.some(l=>/^info: .*affiliate tag not set/.test(l)),'no console log: '+logs.join('|'));
+ await d.goto(URL0+'?debug=1');await d.waitForSelector('html[data-ready="1"]');ok(await d.isVisible('#devNote'),'not shown with ?debug=1');ok(/affiliate tag not set/.test(await d.textContent('#devNote')));await ctx.close();
+ const t=await page({q:'?debug=1',aff:{amazonUK:{tag:'x-21'}}});ok(!(await t.isVisible('#devNote')),'shown with tag set');await t.context().close()});
 await T('AF4','Hooks stay disabled unless explicitly enabled; enabling one wraps non-Amazon links (with Ad), Amazon logic unaffected',async()=>{const q=await page({aff:{skimlinks:{id:'123X456',enabled:true}}});const r=await q.evaluate(()=>[WD.affiliate.buyLink('https://www.currys.co.uk/p/kettle?utm_source=a&colour=red'),WD.affiliate.buyLink('https://www.amazon.co.uk/dp/B0BX2L8PBT')]);
  ok(r[0].show&&r[0].ad&&r[0].hook=='skimlinks'&&r[0].href.includes(encodeURIComponent('https://www.currys.co.uk/p/kettle?colour=red')),JSON.stringify(r[0]));ok(r[1].href=='https://www.amazon.co.uk/dp/B0BX2L8PBT'&&!r[1].ad,JSON.stringify(r[1]));await q.context().close()});
 await T('E1','No JS errors in main session',async()=>{ok(!p.errs.length,p.errs.join(' | '))});
