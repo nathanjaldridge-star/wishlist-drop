@@ -63,6 +63,10 @@ h1.wm{line-height:1}html:not([data-theme]) h1.wm,html[data-theme=drop] h1.wm{tex
 .demo b{color:var(--demo-em)}html:not([data-theme]) .demo[role=region]{border-bottom:3px solid #FF6600}
 .tabs svg{width:22px;height:22px;display:block;margin:0 auto 2px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}html:not([data-theme]) .wm span,html[data-theme=drop] .wm span{color:#E55A00}
 .theme[hidden]{display:none!important}
+.mark{position:relative}.bell{display:none}html[data-season=xmas] .bell{display:block;position:absolute;right:-9px;top:-9px;width:26px;height:26px;transform-origin:50% 8%}
+@media (prefers-reduced-motion:no-preference){html[data-season=xmas] .bell{animation:jingle 1.4s ease-in-out .8s 1}}@keyframes jingle{0%,100%{transform:rotate(0)}20%{transform:rotate(14deg)}40%{transform:rotate(-11deg)}60%{transform:rotate(7deg)}80%{transform:rotate(-3deg)}}
+.xk{display:none}html[data-season=xmas] .xk{display:block;margin:0 0 2px;font:800 12px/1.3 var(--font);letter-spacing:.1em;text-transform:uppercase;color:#B34700}
+.season[hidden]{display:none!important}.season{margin:8px 0 0}.season button{flex:none;width:auto;min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 8px;border:2px solid #000;border-radius:var(--rs);background:#fff;color:#000;font-size:14px;font-weight:700}.season button[aria-pressed=true]{background:#000;color:#FF6600}.season .bi{width:26px;height:26px;flex:none}.season button:focus-visible{outline:3px solid #B34700;outline-offset:2px}
 .demo{background:var(--demo-bg);color:var(--demo-ink);text-align:center;font-weight:var(--fw-h);padding:8px;font-size:14px;position:sticky;top:0;z-index:5}
 header{padding:14px 16px 0;max-width:720px;margin:auto}.hrow{display:flex;justify-content:space-between;align-items:center;gap:8px}h1{margin:0;font-size:var(--h1);font-weight:var(--fw-x);letter-spacing:-.01em}h1 span{color:var(--accent-lg)}header p{margin:2px 0 0;color:var(--mut);font-size:14px}
 .theme{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut)}.theme label{margin:0;font-weight:var(--fw-b);font-size:13px}.theme select{width:auto;min-height:44px;padding:6px 8px;font-size:14px;border-radius:var(--rs)}
@@ -124,10 +128,17 @@ try{var st=localStorage.getItem(K)}catch(e){}t=T.indexOf(q)>=0?q:T.indexOf(st)>=
 var d=document.documentElement;if(t!=='default')d.setAttribute('data-theme',t);window.WD_THEMES=T;window.WD_THEME_KEY=K;
 window.WD_LOAD_FONTS=function(){if(document.getElementById('gfonts')||!navigator.onLine&&navigator.onLine!==undefined)return;var l=document.createElement('link');l.id='gfonts';l.rel='stylesheet';l.media='print';l.href='https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;700;800&display=swap';l.onload=function(){l.media='all'};l.onerror=function(){l.remove()};document.head.appendChild(l)};
 window.WD_LOAD_FONTS();})();
+/* Seasonal mode. AUTO_XMAS: auto-enable Christmas mode 1-31 Dec (Europe/London date) only. ?season=xmas forces on, ?season=off forces off; toggle choice persists in localStorage. */
+var AUTO_XMAS=true;
+(function(){var K='dropClub.season',d=document.documentElement,q=null,st=null,now=window.WD_NOW?new Date(window.WD_NOW):new Date(),m;
+try{q=new URLSearchParams(location.search).get('season')}catch(e){}try{st=localStorage.getItem(K)}catch(e){}
+try{m=+new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',month:'numeric'}).format(now)}catch(e){m=now.getMonth()+1}
+var auto=AUTO_XMAS===true&&m===12,on=q==='xmas'?true:q==='off'?false:st==='xmas'?true:st==='off'?false:auto;
+if(on)d.setAttribute('data-season','xmas');window.WD_SEASON={key:K,param:q,auto:auto,stored:st,month:m};})();
 </script>
 </head><body>
 <div class="demo" role="region" aria-label="Demo data notice"><b>DEMO PRICES</b> — simulated, not real · HotUKDeals data is community-reported</div>
-<header role="banner"><div class="hrow"><div class="brand"><span class="mark" aria-hidden="true">D</span><div><h1 class="wm">Drop Club</h1><p class="tagline">Exclusive drops. Real value.</p></div></div><div class="theme" id="themeBox" hidden><label for="themeSel">Theme</label><select id="themeSel"><option value="default">Drop Club</option><option value="purple">Purple (old)</option><option value="drop">Drop</option><option value="clean">Clean</option><option value="hybrid">Hybrid</option></select></div></div><p>Your 10 drops. We compare retailers and flag any price 10%+ below RRP. No sign-up.</p></header>
+<header role="banner"><div class="hrow"><div class="brand"><span class="mark" aria-hidden="true">D<svg class="bell" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="#000" stroke="#FAF9F6" stroke-width="2"/><circle cx="12" cy="7" r="1.7" fill="none" stroke="#FF6600" stroke-width="1.4"/><circle cx="12" cy="13.6" r="5.4" fill="#FF6600"/><path d="M7.4 12.6h9.2" stroke="#000" stroke-width="1.3"/><circle cx="12" cy="16" r="1.15" fill="#000"/><path d="M12 16.6v2.2" stroke="#000" stroke-width="1.3"/></svg></span><div><h1 class="wm">Drop Club</h1><p class="tagline">Exclusive drops. Real value.</p></div></div><div class="theme" id="themeBox" hidden><label for="themeSel">Theme</label><select id="themeSel"><option value="default">Drop Club</option><option value="purple">Purple (old)</option><option value="drop">Drop</option><option value="clean">Clean</option><option value="hybrid">Hybrid</option></select></div></div><p>Your 10 drops. We compare retailers and flag any price 10%+ below RRP. No sign-up.</p><div class="season" id="seasonBox" hidden><button type="button" id="seasonBtn" aria-pressed="false"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="#000" stroke="#FAF9F6" stroke-width="2"/><circle cx="12" cy="7" r="1.7" fill="none" stroke="#FF6600" stroke-width="1.4"/><circle cx="12" cy="13.6" r="5.4" fill="#FF6600"/><path d="M7.4 12.6h9.2" stroke="#000" stroke-width="1.3"/><circle cx="12" cy="16" r="1.15" fill="#000"/><path d="M12 16.6v2.2" stroke="#000" stroke-width="1.3"/></svg><span>Christmas mode</span></button></div></header>
 <main>
 <div id="roView" hidden>
  <section><div class="ro">Shared Drop Club list (read-only). Prices are a snapshot from the sender: DEMO prices are simulated; HotUKDeals prices are community-reported.</div><h2 id="roTitle">Top 10</h2><ol class="top" id="roList"></ol>
@@ -174,7 +185,7 @@ window.WD_LOAD_FONTS();})();
 </section>
 </div>
 <div id="tab-alerts" role="tabpanel" aria-labelledby="t-alerts" hidden><section><h2>Alerts <button id="clearAlerts">Clear</button></h2><p class="small">Each alert shows its source. DEMO = simulated. HotUKDeals = community-reported. Alerts only fire on records with status OK.</p><div id="feed" aria-live="polite"></div></section></div>
-<div id="tab-share" role="tabpanel" aria-labelledby="t-share" hidden><section><h2>Your Top 10 Drops</h2><p class="small">Ranked by how close each drop is to its target.</p><ol class="top" id="topList"></ol>
+<div id="tab-share" role="tabpanel" aria-labelledby="t-share" hidden><section><p class="xk" id="topK">My Christmas drops</p><h2 id="topH">Your Top 10 Drops</h2><p class="small">Ranked by how close each drop is to its target.</p><ol class="top" id="topList"></ol>
  <button class="pri full" id="copyBtn">Copy share link</button>
  <button class="full" id="cardBtn">Make share card</button>
  <canvas id="card" width="1080" height="1350" hidden aria-label="Share card image of your Top 10"></canvas>
@@ -461,8 +472,8 @@ function drawCard(){var cv=$('card'),x=cv.getContext('2d'),W=1080,H=1350,list=ra
  var g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,v('--card-g1'));g.addColorStop(1,v('--card-g2'));x.fillStyle=g;x.fillRect(0,0,W,H);
  
  if(th==='drop'){x.fillStyle='#000';x.fillRect(0,0,W,22)}if(th==='default'){x.fillStyle='#FF6600';x.fillRect(0,0,W,16)}
- var BOLD=th==='default'||th==='drop';rr(x,v('--mark-bg'),64,58,120,120,BOLD?14:24);if(th==='drop'){x.lineWidth=5;x.strokeStyle='#000';x.stroke()}x.fillStyle=v('--mark-ink');x.font='900 92px '+F;x.textAlign='center';x.fillText('D',124,152);x.textAlign='left';
- x.fillStyle=v('--card-title');x.font=fx+' 84px '+F;x.fillText(BOLD?'DROP CLUB':'Drop Club',212,132);x.font='800 26px '+F;x.fillStyle=th==='drop'?'#000':v('--accent');x.fillText('EXCLUSIVE DROPS. REAL VALUE.',214,172);x.font='500 30px '+F;x.fillStyle=v('--card-sub');x.fillText('My Top '+list.length+' drops · waiting for the right price',64,218);
+ var BOLD=th==='default'||th==='drop';rr(x,v('--mark-bg'),64,58,120,120,BOLD?14:24);if(th==='drop'){x.lineWidth=5;x.strokeStyle='#000';x.stroke()}x.fillStyle=v('--mark-ink');x.font='900 92px '+F;x.textAlign='center';x.fillText('D',124,152);x.textAlign='left';var XM=isXmas();if(XM){var bx=180,by=62;x.beginPath();x.arc(bx,by,30,0,7);x.fillStyle='#FAF9F6';x.fill();x.beginPath();x.arc(bx,by,26,0,7);x.fillStyle='#000';x.fill();x.beginPath();x.arc(bx,by+3,13,0,7);x.fillStyle='#FF6600';x.fill();x.beginPath();x.arc(bx,by-13,4,0,7);x.lineWidth=3;x.strokeStyle='#FF6600';x.stroke();x.fillStyle='#000';x.fillRect(bx-11,by,22,3);x.beginPath();x.arc(bx,by+8,3,0,7);x.fill()}
+ x.fillStyle=v('--card-title');x.font=fx+' 84px '+F;x.fillText(BOLD?'DROP CLUB':'Drop Club',212,132);x.font='800 26px '+F;x.fillStyle=th==='drop'?'#000':v('--accent');x.fillText('EXCLUSIVE DROPS. REAL VALUE.',214,172);if(XM){x.font='800 30px '+F;x.fillStyle=th==='drop'?'#000':v('--accent');x.fillText('MY CHRISTMAS DROPS',64,218);var xw=x.measureText('MY CHRISTMAS DROPS').width;x.font='500 30px '+F;x.fillStyle=v('--card-sub');x.fillText(' · Top '+list.length+' Christmas list',64+xw,218)}else{x.font='500 30px '+F;x.fillStyle=v('--card-sub');x.fillText('My Top '+list.length+' drops · waiting for the right price',64,218)}
  rr(x,v('--card-panel'),48,236,W-96,H-236-150,R);x.lineWidth=(th==='drop'||th==='default')?5:2;x.strokeStyle=v('--card-stroke');x.stroke();
  var rowH=Math.min(92,(H-236-150-40)/Math.max(list.length,1)),y=256;
  if(!list.length){x.fillStyle=v('--mut');x.font='500 36px '+F;x.fillText('No items yet',96,330)}
@@ -501,6 +512,15 @@ var hasThemeParam=false;try{hasThemeParam=new URLSearchParams(location.search).h
 $('themeBox').hidden=!(hasThemeParam||curTheme()!=='default');
 $('themeSel').value=curTheme();$('themeSel').onchange=function(){setTheme(this.value,true)};
 WD.setTheme=setTheme;WD.theme=curTheme;
+
+/* ================= Seasonal (Christmas) mode ================= */
+function isXmas(){return document.documentElement.getAttribute('data-season')==='xmas'}
+function applySeason(){var on=isXmas();$('seasonBtn').setAttribute('aria-pressed',on?'true':'false');$('topH').textContent=on?'Your Top 10 Christmas list':'Your Top 10 Drops';if(!$('card').hidden)drawCard()}
+function setSeason(on,persist){if(on)document.documentElement.setAttribute('data-season','xmas');else document.documentElement.removeAttribute('data-season');
+ if(persist){try{localStorage.setItem(WD_SEASON.key,on?'xmas':'off')}catch(e){}try{var u=new URL(location.href);if(u.searchParams.has('season')){u.searchParams.set('season',on?'xmas':'off');history.replaceState(null,'',u.toString())}}catch(e){}}applySeason()}
+$('seasonBox').hidden=!(isXmas()||WD_SEASON.param!=null||WD_SEASON.auto);
+$('seasonBtn').onclick=function(){setSeason(!isXmas(),true)};applySeason();
+WD.season={isXmas:isXmas,set:setSeason,info:WD_SEASON,AUTO_XMAS:AUTO_XMAS};
 
 var tagUnset=!String(AFFILIATE.amazonUK.tag||'').trim(),dbg=false;try{dbg=new URLSearchParams(location.search).get('debug')==='1'}catch(e){}$('devNote').hidden=!(tagUnset&&dbg);if(tagUnset&&window.console)console.info('[Drop Club] affiliate tag not set: Amazon links are untagged.');
 WD.affiliate={config:AFFILIATE,parseAmazon:parseAmazon,buyLink:buyLink,stripTracking:stripTracking,hooks:RETAILER_HOOKS};

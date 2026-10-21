@@ -55,6 +55,14 @@ Every source is an adapter: `getPrice(item) → Promise<record>`, plus an option
 
 **HotUKDeals loading order:** on https, `./data/hukd.json` (a same-origin mirror, so no CORS), then the live feed (usually CORS-blocked), then the embedded snapshot (2026-10-17). The mirror is refreshed every 30 minutes by [`docs/workflows/hukd-mirror.yml`](docs/workflows/hukd-mirror.yml) (**pending: move it to `.github/workflows/` to activate**; the deploy token lacked the `workflow` scope), which runs [`scripts/fetch-hukd.mjs`](scripts/fetch-hukd.mjs).
 
+## Christmas mode
+A seasonal look for the Drop Club default: a black/orange jingle bell on the D mark, "MY CHRISTMAS DROPS" / "Your Top 10 Christmas list" framing, and a Christmas share card. The palette is unchanged and there is no snow.
+- Force on: https://nathanjaldridge-star.github.io/wishlist-drop/?season=xmas. Force off: `?season=off`.
+- Auto-on 1–31 Dec (Europe/London date) via `AUTO_XMAS=true` in the head script. It never triggers outside December.
+- The "Christmas mode" toggle appears only when the season is active, the param is present, or it's December. The choice is remembered in `localStorage["dropClub.season"]`.
+
+<img src="themes/dropclub-xmas-header.png" width="200"> <img src="themes/dropclub-xmas-top10.png" width="200"> <img src="themes/dropclub-xmas-sharecard.png" width="200">
+
 ## Repo layout
 - `index.html`: the whole app (self-contained, also works offline from `file://`), built from `build/src.html` with `build/hukd_sample.xml` injected at `%%HUKD%%`.
 - `build/test.js`: headless test (playwright-core + system Chrome, ajv schema validation). Run `npm i playwright-core ajv ajv-formats && node build/test.js` (it uses absolute paths from the dev box; adjust `D`).

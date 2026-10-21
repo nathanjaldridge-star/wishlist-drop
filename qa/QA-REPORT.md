@@ -149,3 +149,10 @@ Tests: AF1 (15 URL cases), AF2 (tag set: cards/alerts/shared view, existing tag 
 
 ## Top 10 compact rows + screenshot cleanup (2026-10-17)
 Top 10 rows at 390px: the name is on one line (ellipsis, full name in `title`), then the status pill and price inline, then one short meta line (RRP · target · source), then the Buy button. Seed rows went from 166/124/147px to 118/100/100px tall (measured at 390px). Stale old-branded `screenshots/` and legacy `themes/*-{watch,alerts,top10,sharecard}.png` were removed. `affiliate-buy.png` and `dropclub-*.png` were regenerated. Tests: qa.js 68/68, build/test.js 23/23, axe contrast: fail 0 on all 25 screens.
+
+## Christmas mode (seasonal, Drop Club default)
+- `?season=xmas` forces it on and `?season=off` forces it off. The "Christmas mode" toggle (`aria-pressed`) shows only when the season is active, the param is present, or it is December. The choice persists in `localStorage["dropClub.season"]`, and the URL param, when present, is updated to match.
+- Auto-on is behind `var AUTO_XMAS=true` (head script). It triggers only when the **Europe/London** month is 12, so nothing shows before 1 Dec without the param. The date can be mocked with `window.WD_NOW`.
+- Visuals: a black/orange jingle-bell inline SVG on the D mark corner, with one gentle swing on load that is disabled under `prefers-reduced-motion`. Top 10 gets the "MY CHRISTMAS DROPS" kicker (#B34700) and the heading "Your Top 10 Christmas list". The share card shows "MY CHRISTMAS DROPS · Top N Christmas list" plus a bell. No snow and no new colours.
+- Tests: XM1 covers params, auto by mocked date including New York/Tokyo browser time zones, toggle visibility, persistence and param-wins. XM2 covers share-card text, bell pixels, the DEMO label kept, and the normal card unchanged. DC2 palette audit runs in both normal and xmas mode. TH4 axe adds `default&season=xmas` (30 screens, fail 0). qa.js 70/70, build/test.js 23/23.
+- Screenshots: `themes/dropclub-xmas-header.png`, `themes/dropclub-xmas-top10.png`, `themes/dropclub-xmas-sharecard.png`.
