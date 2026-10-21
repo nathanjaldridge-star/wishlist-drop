@@ -1,6 +1,8 @@
+# READY TO ACTIVATE: move this file to .github/workflows/hukd-mirror.yml (needs a token with the `workflow` scope,
+# or do it in the GitHub web UI). Free on public repos. Polls politely every 30 minutes.
 name: Mirror HotUKDeals RSS
 on:
-  schedule: [{ cron: '*/30 * * * *' }]
+  schedule: [{ cron: '7,37 * * * *' }]
   workflow_dispatch:
 permissions:
   contents: write
@@ -9,18 +11,24 @@ concurrency: { group: hukd-mirror, cancel-in-progress: false }
 jobs:
   mirror:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: node scripts/fetch-hukd.mjs
+      - name: Self-test the fetcher (offline, local server)
+        run: node scripts/test-fetch-hukd.mjs
+      - name: Fetch (conditional GET, 15s timeout, validated; keeps previous mirror on any upstream problem)
+        run: node scripts/fetch-hukd.mjs
       - name: Commit if changed
         run: |
-          git config user.name "wishlist-drop-bot"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/hukd.json
-          git diff --cached --quiet || (git commit -m "data: refresh HotUKDeals mirror" && git push)
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "data: refresh HotUKDeals mirror"
+          git pull --rebase --autostash && git push
       - name: Request Pages rebuild
-        if: always()
+        if: success()
         env: { GH_TOKEN: '${{ github.token }}' }
         run: gh api -X POST repos/${{ github.repository }}/pages/builds || true

@@ -9,7 +9,7 @@ const D='/workspace/wishlist-drop/';const log=[];const ok=m=>{log.push('✓ '+m)
 const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:1});const p=await ctx.newPage();
 const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()=='error'&&!/hotukdeals|CORS|Failed to fetch|ERR_FAILED/i.test(m.text()))errs.push(m.text())});
 let promptAns='59.99';await p.exposeFunction('WD_DIALOG_HOOK',(m,t)=>t=='prompt'?promptAns:true);p.on('dialog',d=>d.accept(d.type()=='prompt'?promptAns:undefined));
-await p.goto('file://'+D+'index.html');await p.waitForSelector('html[data-ready="1"]',{timeout:15000});
+await p.goto('file://'+D+'index.html?demo=1');await p.waitForSelector('html[data-ready="1"]',{timeout:15000});
 const S=()=>p.evaluate(()=>WD.state());
 let s=await S();As.equal(s.items.length,3);ok('loads, 3 labelled examples seeded');
 As.equal(await p.evaluate(()=>document.activeElement.id),'what');As.ok(await p.isVisible('#welcome'));ok('first run focuses the add box with welcome hint (no signup)');
@@ -52,7 +52,7 @@ await p.click('button[data-err=ok]');ok('error-state UI for not_found / blocked 
 // simulate → alert
 for(let i=0;i<80&&!(await S()).alerts.some(a=>/DEMO/.test(a.src)&&/target/.test(a.text));i++)await p.click('#simBtn');
 As.ok((await S()).alerts.some(a=>/DEMO/.test(a.src)&&/target/.test(a.text)));ok('simulation triggered a DEMO alert; alerts: '+(await S()).alerts.length);
-const pills=await p.$$eval('#cards .pill',e=>[...new Set(e.map(x=>x.textContent))]);As.ok((await S()).items.every(i=>i.offers&&i.offers.length>=1));As.ok(await p.isVisible('.cmp'));As.ok((await S()).alerts.some(a=>/below RRP/.test(a.text)));ok('≥10%-below-reference alert fired (cheapest retailer named)');ok('per-item cross-source comparison shows cheapest retailer + gap');ok('status pills seen: '+pills.join(', '));
+const pills=await p.$$eval('#cards .pill',e=>[...new Set(e.map(x=>x.textContent))]);As.ok((await S()).items.every(i=>i.offers&&i.offers.length>=1));As.ok(await p.isVisible('.cmp'));As.ok((await S()).alerts.some(a=>/below its reference/.test(a.text)));ok('≥10%-below-reference alert fired (cheapest retailer named)');ok('per-item cross-source comparison shows cheapest retailer + gap');ok('status pills seen: '+pills.join(', '));
 // share
 const su=await p.evaluate(()=>WD.shareUrl());const names=(await S()).items.map(i=>i.name).sort();
 const p2=await ctx.newPage();p2.on('pageerror',e=>errs.push(e.message));await p2.goto(su);await p2.waitForSelector('#roView:not([hidden])');

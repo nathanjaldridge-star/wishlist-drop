@@ -3,9 +3,20 @@
 
 **Live:** https://nathanjaldridge-star.github.io/wishlist-drop/
 
-Drop Club tracks up to 10 drops. It checks each one across retailers and sources, shows the **cheapest retailer and the % off RRP** (RRP is the reference price you enter), and alerts you when a drop is **10% or more below RRP** or hits your own target (10–20%, default 15%). No sign-up: everything is saved in your browser.
+Drop Club tracks up to 10 drops. It checks each one across sources, shows the **cheapest price found and the % below your reference**, and alerts you when a drop is **10% or more below its reference** or hits your target. **Beta, no sign-up.**
 
-<img src="themes/dropclub-header-add.png" width="200"> <img src="themes/dropclub-drops.png" width="200"> <img src="themes/dropclub-top10.png" width="200"> <img src="themes/dropclub-sharecard.png" width="200">
+<img src="themes/dropclub-public-header.png" width="200"> <img src="themes/dropclub-public-drops.png" width="200"> <img src="themes/dropclub-public-nolive.png" width="200"> <img src="themes/dropclub-public-top10.png" width="200">
+
+## Public vs demo
+- **Public URL** (https://nathanjaldridge-star.github.io/wishlist-drop/): no simulated prices, no DEMO source or offers, no "Simulate a day" or auto-simulate, and no seeded examples. A price only appears when it comes from a real source: HotUKDeals (community reported) or a price you type in (labelled "entered by you"). Items with no real price show **"Watching — no live price yet"**. Every price shown carries a **source badge and a checked-at time**. A **Beta** tag sits next to the wordmark.
+- **Demo** (https://nathanjaldridge-star.github.io/wishlist-drop/?demo=1): the old playground with example drops, Simulate a day, auto-simulate and the DEMO Amazon/Argos source. Everything there is labelled DEMO. It uses its own storage key (`dropClub.demo.v2`), so it never mixes with your real list.
+- **Old data:** opening the public URL with older DEMO data in `wishlistDrop.v2` removes the example items, drops all simulated prices, offers and alerts, keeps your item names, links and entered prices, and turns auto-simulate off.
+- **Invariant, tested:** a visitor never sees an unlabelled fake price. `qa.js` PB1 walks every visible `£` price on Drops, Alerts, Top 10 and the read-only view and fails if it has no source badge, or (for observed prices) no checked-at time. PB3 confirms `?demo=1` still labels everything DEMO.
+
+## Reference price (honest % off)
+- **Reference = median of observed prices** once there are ≥4 observations spanning ≥28 days (within the last 90 days). The basis is shown, e.g. "median of 6 observed prices over 35 days".
+- Until then, the **reference is the price when added**: what you typed, shown as "price when added (you entered on 21 Oct). Not a verified RRP."
+- % off, the target, "Dropped/At target" and the ≥10% alert are all computed against that reference. Drop Club never calls your number a verified RRP.
 
 ## Themes
 Add `?theme=` to the URL. The **Theme** picker appears in the header only when `?theme=` is present or a non-default theme is saved. Your choice is remembered, and the URL wins over the remembered choice.
@@ -21,7 +32,7 @@ Add `?theme=` to the URL. The **Theme** picker appears in the header only when `
 
 Screenshots show the Drop Club default only. The legacy themes are still live via `?theme=`, but their old-branded screenshots have been removed.
 
-The DEMO banner and labels show in every theme. All five themes pass an axe-core WCAG AA scan with no colour-contrast failures (`qa/themes-contrast.txt`). White text never sits on #FF6600 (2.9:1). Black is used instead, and small orange text is #B34700. The share card PNG follows the theme. Fonts load from Google Fonts (free) without blocking the page, with system fonts offline.
+The Beta notice (public) or DEMO banner (`?demo=1`) and the source labels show in every theme. All five themes pass an axe-core WCAG AA scan with no colour-contrast failures (`qa/themes-contrast.txt`). White text never sits on #FF6600 (2.9:1). Black is used instead, and small orange text is #B34700. The share card PNG follows the theme. Fonts load from Google Fonts (free) without blocking the page, with system fonts offline.
 
 ## Affiliate links & disclosure
 **Drop Club is a participant in the Amazon Associates Programme. As an Amazon Associate we earn from qualifying purchases.** Links marked **Ad** are affiliate links, and we may earn a commission at no extra cost to you.
@@ -32,9 +43,10 @@ The DEMO banner and labels show in every theme. All five themes pass an axe-core
 - **Other retailers:** Skimlinks, Sovrn and Awin deep-link hooks are in `RETAILER_HOOKS`. They're disabled (`enabled:false`) until those programmes approve the site.
 
 ## ⚠️ Data labels: please read
-- **DEMO prices are simulated, not real.** Items on the DEMO source (including "DEMO Amazon UK" and "DEMO Argos") follow a random walk. The banner and tags say so everywhere.
+- **DEMO prices are simulated, not real, and only exist at `?demo=1`.** Items on the DEMO source (including "DEMO Amazon UK" and "DEMO Argos") follow a random walk. The banner and tags say so everywhere.
 - **HotUKDeals data is community reported.** Prices and codes come from user posts on the public HotUKDeals RSS feed and are unverified. Codes are only taken from a post's description text, never generated.
-- The example items are labelled "(example)". The Levi's reference price (£90) is made up.
+- **Entered by you:** prices you type are labelled as yours, never as a verified RRP.
+- The demo's example items are labelled "(example)". The Levi's reference price (£90) is made up.
 
 ## Features
 - Add an item by pasting a link or typing a name (a link gets a readable name). Price is optional, and you're prompted if it's blank. Set the target as % off or as a £ price.
@@ -48,9 +60,9 @@ Every source is an adapter: `getPrice(item) → Promise<record>`, plus an option
 
 | Adapter | Status | Notes |
 |---|---|---|
-| DEMO | on | Simulated. Emits `source:"manual"` + `label:"DEMO"` because the schema enum has no `demo` |
+| DEMO | `?demo=1` only | Simulated. Emits `source:"manual"` + `label:"DEMO"` because the schema enum has no `demo` |
 | HotUKDeals RSS (`hukd_rss`) | on | Fuzzy title match. `pepper:merchant` gives the retailer, "£2" becomes 200p, the "101° - " prefix is stripped. Labelled community reported |
-| Manual | on | Your own price |
+| Manual | on | Your own price, labelled "entered by you" |
 | Awin feed / Awin promotions / Keepa | **awaiting approval** | Disabled stubs that return `blocked` |
 
 **HotUKDeals loading order:** on https, `./data/hukd.json` (a same-origin mirror, so no CORS), then the live feed (usually CORS-blocked), then the embedded snapshot (2026-10-17). The mirror is refreshed every 30 minutes by [`docs/workflows/hukd-mirror.yml`](docs/workflows/hukd-mirror.yml) (**pending: move it to `.github/workflows/` to activate**; the deploy token lacked the `workflow` scope), which runs [`scripts/fetch-hukd.mjs`](scripts/fetch-hukd.mjs).
@@ -66,12 +78,14 @@ A seasonal look for the Drop Club default: a black/orange jingle bell on the D m
 ## Repo layout
 - `index.html`: the whole app (self-contained, also works offline from `file://`), built from `build/src.html` with `build/hukd_sample.xml` injected at `%%HUKD%%`.
 - `build/test.js`: headless test (playwright-core + system Chrome, ajv schema validation). Run `npm i playwright-core ajv ajv-formats && node build/test.js` (it uses absolute paths from the dev box; adjust `D`).
+- `scripts/fetch-hukd.mjs`: the mirror fetcher. It sends a conditional GET (If-None-Match/If-Modified-Since from the last mirror; a 304 means no write and no commit), has a 15s timeout with one retry, and validates before writing: complete RSS, ≥5 items with title and link, size limits, and no sudden collapse in item count. A bad feed keeps the previous mirror. Writes are atomic, and upstream problems produce warnings, not failures. `scripts/test-fetch-hukd.mjs` tests it offline against a local server. Note: HotUKDeals currently sends no ETag or Last-Modified, so unchanged feeds are detected by content comparison.
+- `docs/workflows/hukd-mirror.yml`: the 30-minute mirror workflow, **ready to move** to `.github/workflows/`. It needs a token with the `workflow` scope, or the GitHub web UI. It self-tests the fetcher, fetches, commits only on change, and requests a Pages rebuild.
 - `data/hukd.json`: the RSS mirror. `docs/`: the price contract. `themes/`: current Drop Club screenshots.
 
 ## Limitations
 - In-browser alerts only, and only while the page is open. There's no email or push yet (see roadmap).
 - No real retailer prices yet. HotUKDeals only covers items someone has posted. Fuzzy matching can mis-match (confidence is shown).
-- The reference price is your entered original price, not a historical median.
+- The 28-day median only kicks in once a browser has collected enough observations. History is per browser until there's a backend.
 - The share link carries a snapshot of the prices at the moment you copied it.
 
 ## Roadmap: a real site on free tiers (no paid sign-ups)

@@ -63,6 +63,11 @@ h1.wm{line-height:1}html:not([data-theme]) h1.wm,html[data-theme=drop] h1.wm{tex
 .demo b{color:var(--demo-em)}html:not([data-theme]) .demo[role=region]{border-bottom:3px solid #FF6600}
 .tabs svg{width:22px;height:22px;display:block;margin:0 auto 2px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}html:not([data-theme]) .wm span,html[data-theme=drop] .wm span{color:#E55A00}
 .theme[hidden]{display:none!important}
+html:not([data-demo]) .demo-only,html[data-demo] .pub-only{display:none!important}
+.wmrow{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px}.beta{flex:none;font:800 11px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);border:2px solid currentColor;padding:3px 6px;border-radius:4px}
+.srcline{margin:6px 0 0;font-size:12.5px;line-height:1.4;color:var(--mut)}.srcline .srcb,.srcb{font-weight:700;color:var(--ink)}.nolive{color:var(--mut)}
+.cmp li .srcb,.tm .srcb{font-weight:500;color:var(--mut)}.alert .srcb{color:inherit;font-weight:700}
+.err.nolive{background:#fff;color:var(--ink);border:1px dashed var(--line2)}
 .mark{position:relative}.bell{display:none}html[data-season=xmas] .bell{display:block;position:absolute;right:-9px;top:-9px;width:26px;height:26px;transform-origin:50% 8%}
 @media (prefers-reduced-motion:no-preference){html[data-season=xmas] .bell{animation:jingle 1.4s ease-in-out .8s 1}}@keyframes jingle{0%,100%{transform:rotate(0)}20%{transform:rotate(14deg)}40%{transform:rotate(-11deg)}60%{transform:rotate(7deg)}80%{transform:rotate(-3deg)}}
 .xk{display:none}html[data-season=xmas] .xk{display:block;margin:0 0 2px;font:800 12px/1.3 var(--font);letter-spacing:.1em;text-transform:uppercase;color:#B34700}
@@ -130,6 +135,8 @@ window.WD_LOAD_FONTS=function(){if(document.getElementById('gfonts')||!navigator
 window.WD_LOAD_FONTS();})();
 /* Seasonal mode. AUTO_XMAS: auto-enable Christmas mode 1-31 Dec (Europe/London date) only. ?season=xmas forces on, ?season=off forces off; toggle choice persists in localStorage. */
 var AUTO_XMAS=true;
+/* DEMO mode only with ?demo=1. The public URL never shows simulated prices. */
+var WD_DEMO=false;try{WD_DEMO=new URLSearchParams(location.search).get('demo')==='1'}catch(e){}if(WD_DEMO)document.documentElement.setAttribute('data-demo','1');
 (function(){var K='dropClub.season',d=document.documentElement,q=null,st=null,now=window.WD_NOW?new Date(window.WD_NOW):new Date(),m;
 try{q=new URLSearchParams(location.search).get('season')}catch(e){}try{st=localStorage.getItem(K)}catch(e){}
 try{m=+new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/London',month:'numeric'}).format(now)}catch(e){m=now.getMonth()+1}
@@ -137,11 +144,11 @@ var auto=AUTO_XMAS===true&&m===12,on=q==='xmas'?true:q==='off'?false:st==='xmas'
 if(on)d.setAttribute('data-season','xmas');window.WD_SEASON={key:K,param:q,auto:auto,stored:st,month:m};})();
 </script>
 </head><body>
-<div class="demo" role="region" aria-label="Demo data notice"><b>DEMO PRICES</b> — simulated, not real · HotUKDeals data is community-reported</div>
-<header role="banner"><div class="hrow"><div class="brand"><span class="mark" aria-hidden="true">D<svg class="bell" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="#000" stroke="#FAF9F6" stroke-width="2"/><circle cx="12" cy="7" r="1.7" fill="none" stroke="#FF6600" stroke-width="1.4"/><circle cx="12" cy="13.6" r="5.4" fill="#FF6600"/><path d="M7.4 12.6h9.2" stroke="#000" stroke-width="1.3"/><circle cx="12" cy="16" r="1.15" fill="#000"/><path d="M12 16.6v2.2" stroke="#000" stroke-width="1.3"/></svg></span><div><h1 class="wm">Drop Club</h1><p class="tagline">Exclusive drops. Real value.</p></div></div><div class="theme" id="themeBox" hidden><label for="themeSel">Theme</label><select id="themeSel"><option value="default">Drop Club</option><option value="purple">Purple (old)</option><option value="drop">Drop</option><option value="clean">Clean</option><option value="hybrid">Hybrid</option></select></div></div><p>Your 10 drops. We compare retailers and flag any price 10%+ below RRP. No sign-up.</p><div class="season" id="seasonBox" hidden><button type="button" id="seasonBtn" aria-pressed="false"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="#000" stroke="#FAF9F6" stroke-width="2"/><circle cx="12" cy="7" r="1.7" fill="none" stroke="#FF6600" stroke-width="1.4"/><circle cx="12" cy="13.6" r="5.4" fill="#FF6600"/><path d="M7.4 12.6h9.2" stroke="#000" stroke-width="1.3"/><circle cx="12" cy="16" r="1.15" fill="#000"/><path d="M12 16.6v2.2" stroke="#000" stroke-width="1.3"/></svg><span>Christmas mode</span></button></div></header>
+<div class="demo demo-only" role="region" aria-label="Demo data notice"><b>DEMO PRICES</b> — simulated, not real · HotUKDeals data is community-reported</div><div class="demo pub-only" role="region" aria-label="Beta notice"><b>BETA</b> — no simulated prices. Every price shows its source and when it was checked.</div>
+<header role="banner"><div class="hrow"><div class="brand"><span class="mark" aria-hidden="true">D<svg class="bell" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="#000" stroke="#FAF9F6" stroke-width="2"/><circle cx="12" cy="7" r="1.7" fill="none" stroke="#FF6600" stroke-width="1.4"/><circle cx="12" cy="13.6" r="5.4" fill="#FF6600"/><path d="M7.4 12.6h9.2" stroke="#000" stroke-width="1.3"/><circle cx="12" cy="16" r="1.15" fill="#000"/><path d="M12 16.6v2.2" stroke="#000" stroke-width="1.3"/></svg></span><div><div class="wmrow"><h1 class="wm">Drop Club</h1><span class="beta" title="Drop Club is in beta">Beta</span></div><p class="tagline">Exclusive drops. Real value.</p></div></div><div class="theme" id="themeBox" hidden><label for="themeSel">Theme</label><select id="themeSel"><option value="default">Drop Club</option><option value="purple">Purple (old)</option><option value="drop">Drop</option><option value="clean">Clean</option><option value="hybrid">Hybrid</option></select></div></div><p>Your 10 drops. We compare retailers and flag any price 10%+ below its reference. No sign-up.</p><div class="season" id="seasonBox" hidden><button type="button" id="seasonBtn" aria-pressed="false"><svg class="bi" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="#000" stroke="#FAF9F6" stroke-width="2"/><circle cx="12" cy="7" r="1.7" fill="none" stroke="#FF6600" stroke-width="1.4"/><circle cx="12" cy="13.6" r="5.4" fill="#FF6600"/><path d="M7.4 12.6h9.2" stroke="#000" stroke-width="1.3"/><circle cx="12" cy="16" r="1.15" fill="#000"/><path d="M12 16.6v2.2" stroke="#000" stroke-width="1.3"/></svg><span>Christmas mode</span></button></div></header>
 <main>
 <div id="roView" hidden>
- <section><div class="ro">Shared Drop Club list (read-only). Prices are a snapshot from the sender: DEMO prices are simulated; HotUKDeals prices are community-reported.</div><h2 id="roTitle">Top 10</h2><ol class="top" id="roList"></ol>
+ <section><div class="ro">Shared Drop Club list (read-only). Prices are a snapshot from the sender, each with its source and check time. HotUKDeals prices are community-reported.<span id="roDemo" hidden> DEMO prices are simulated.</span></div><h2 id="roTitle">Top 10</h2><ol class="top" id="roList"></ol>
  <button class="pri full" id="importBtn">Save a copy to my Drops</button><button class="full" id="exitRo">Open my own Drops</button></section>
 </div>
 <div id="app">
@@ -154,7 +161,7 @@ if(on)d.setAttribute('data-season','xmas');window.WD_SEASON={key:K,param:q,auto:
   <input type="text" id="what" autocomplete="off" placeholder="e.g. Levi's 501 jeans, or paste a shop link" required>
   <p class="hint" id="whatHint">Links get a readable name automatically.</p>
   <div id="nameWrap" hidden><label for="name">Item name</label><input type="text" id="name"></div>
-  <label for="price">RRP / price now (£) <span class="small">(your reference price; we'll ask if blank)</span></label>
+  <label for="price">Price now (£) <span class="small">(what you’ve seen it for today: your reference until we have 28 days of prices. Not a verified RRP. We’ll ask if blank.)</span></label>
   <input type="number" id="price" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 249.99">
   <label id="tgtL">Target</label>
   <div class="seg" role="group" aria-labelledby="tgtL"><button type="button" id="modePct" aria-pressed="true">% off</button><button type="button" id="modeAbs" aria-pressed="false">Target price £</button></div>
@@ -170,21 +177,21 @@ if(on)d.setAttribute('data-season','xmas');window.WD_SEASON={key:K,param:q,auto:
 </section>
 <section aria-labelledby="dashH">
  <h2 id="dashH">Your Drops <button id="refreshBtn" title="Re-check all sources">Refresh</button></h2>
- <div class="row"><button class="pri" id="simBtn">Simulate a day (DEMO)</button></div>
- <label class="toggle"><input type="checkbox" id="auto"> Auto-simulate every 2s (DEMO)</label>
+ <div class="row demo-only"><button class="pri" id="simBtn">Simulate a day (DEMO)</button></div>
+ <label class="toggle demo-only"><input type="checkbox" id="auto"> Auto-simulate every 2s (DEMO)</label>
  <div id="cards"></div>
  <div class="row" style="margin-top:8px"><button id="seedBtn">Load example drops</button><button class="danger" id="clearBtn">Clear all</button></div>
 </section>
 <section aria-labelledby="srcH">
  <h2 id="srcH">Price sources</h2>
  <div class="srcs" id="srcList"></div>
- <details style="margin-top:8px"><summary>Preview error states (DEMO)</summary>
+ <details class="demo-only" style="margin-top:8px"><summary>Preview error states (DEMO)</summary>
   <p class="small">Makes the DEMO source return an error for your first DEMO item, so you can see how each state looks.</p>
   <div class="row"><button data-err="not_found">Not found</button><button data-err="blocked">Blocked</button><button data-err="changed">Changed</button><button data-err="ok">Back to OK</button></div>
  </details>
 </section>
 </div>
-<div id="tab-alerts" role="tabpanel" aria-labelledby="t-alerts" hidden><section><h2>Alerts <button id="clearAlerts">Clear</button></h2><p class="small">Each alert shows its source. DEMO = simulated. HotUKDeals = community-reported. Alerts only fire on records with status OK.</p><div id="feed" aria-live="polite"></div></section></div>
+<div id="tab-alerts" role="tabpanel" aria-labelledby="t-alerts" hidden><section><h2>Alerts <button id="clearAlerts">Clear</button></h2><p class="small">Each alert shows its source and time. <span class="demo-only">DEMO = simulated. </span>HotUKDeals = community-reported. Alerts fire when a price is 10%+ below its reference or hits your target, and only on records with status OK.</p><div id="feed" aria-live="polite"></div></section></div>
 <div id="tab-share" role="tabpanel" aria-labelledby="t-share" hidden><section><p class="xk" id="topK">My Christmas drops</p><h2 id="topH">Your Top 10 Drops</h2><p class="small">Ranked by how close each drop is to its target.</p><ol class="top" id="topList"></ol>
  <button class="pri full" id="copyBtn">Copy share link</button>
  <button class="full" id="cardBtn">Make share card</button>
@@ -204,7 +211,7 @@ Was £1.29 - 41%.]]></description><link>https://www.hotukdeals.com/deals/smashed
 <script>
 (function(){
 'use strict';
-var MAX=10,KEY='wishlistDrop.v2',DEF_PCT=15,$=function(i){return document.getElementById(i)};
+var MAX=10,KEY=WD_DEMO?'dropClub.demo.v2':'wishlistDrop.v2',DEF_PCT=15,$=function(i){return document.getElementById(i)};
 var nowIso=function(){return new Date().toISOString().replace(/\.\d{3}Z$/,'Z')};
 var S={items:[],alerts:[],seeded:false,v:2};
 var gbp=function(p){return p==null?'—':'£'+(p/100).toFixed(2)};
@@ -269,7 +276,7 @@ function pound2p(s){if(!s)return null;var m=String(s).replace(/,/g,'').match(/£
 /* ================= Adapter interface =================
    adapter = { id, name, kind, enabled, label, describe(), init?():Promise, getPrice(item):Promise<record> } */
 var demoErr={}; // itemId -> forced error_state (DEMO preview)
-var DemoAdapter={id:'demo',name:'DEMO simulated prices',label:'DEMO',enabled:true,note:'Random walk. Not real prices.',
+var DemoAdapter={id:'demo',name:'DEMO simulated prices',label:'DEMO',enabled:WD_DEMO,note:'Random walk. Not real prices.',
  getPrice:function(item,opts){opts=opts||{};var forced=demoErr[item.id];
   if(forced&&forced!=='ok'){var d={not_found:'DEMO: pretend the retailer page no longer lists this product.',blocked:'DEMO: pretend the retailer blocked our request.',changed:'DEMO: pretend the page layout changed and the price could not be read reliably.'}[forced];return Promise.resolve(errRecord(item,'manual',forced,d,'DEMO'))}
   var last=item.cur==null?item.orig:item.cur,p=last;
@@ -277,7 +284,7 @@ var DemoAdapter={id:'demo',name:'DEMO simulated prices',label:'DEMO',enabled:tru
   var hist=(item.hist||[]).slice(-29).concat(opts.step||!item.hist||!item.hist.length?[{date:nowIso(),price:p}]:[]);
   return Promise.resolve(record({label:'DEMO',product_id:'demo:'+item.id,canonical_url:item.url||'https://example.com/demo/'+item.id,retailer:'DEMO Amazon UK',title:item.name,current_price:p,was_price:item.orig,is_promo:p<item.orig,in_stock:true,price_history:hist,source:'manual',confidence:1,error_state:'ok'}))}};
 DemoAdapter.getOffers=function(item,opts){return this.getPrice(item,opts).then(function(r){if(r.error_state!=='ok')return[r];var h=0;for(var i=0;i<item.id.length;i++)h=(h*31+item.id.charCodeAt(i))%997;var day=Math.floor(Date.now()/864e5)+(item.hist||[]).length;var f=1+(((h*7+day*13)%13)-6)/100;var r2=JSON.parse(JSON.stringify(r));r2.retailer='DEMO Argos';r2.product_id='demo:argos:'+item.id;r2.current_price=Math.round(r.current_price*f);r2.price_history=[{date:r.fetched_at,price:r2.current_price}];r2.canonical_url='https://example.com/demo-argos/'+item.id;return[r,r2]})};
-var ManualAdapter={id:'manual',name:'Manual (I\u2019ll enter prices)',enabled:true,note:'Uses the price you type in.',
+var ManualAdapter={id:'manual',name:'Manual (I\u2019ll enter prices)',label:'Entered by you',enabled:true,note:'Uses prices you type in, labelled \u201centered by you\u201d.',
  getPrice:function(item){var p=item.cur==null?item.orig:item.cur;return Promise.resolve(record({product_id:'manual:'+item.id,canonical_url:item.url||'https://example.com/manual/'+item.id,retailer:item.url?hostOf(item.url):'Manual entry',title:item.name,current_price:p,was_price:item.orig,price_history:item.hist&&item.hist.length?item.hist:[{date:nowIso(),price:p}],source:'manual',confidence:1,error_state:'ok'}))}};
 function hostOf(u){try{return new URL(u).hostname.replace(/^www\./,'')}catch(e){return 'Manual entry'}}
 function Stub(id,name,source){return{id:id,name:name,enabled:false,note:'Awaiting approval: needs publisher access / API key. Disabled.',getPrice:function(item){return Promise.resolve(errRecord(item,source,'blocked','Awaiting approval: '+name+' is not connected yet.'))}}}
@@ -312,25 +319,39 @@ var HukdAdapter={id:'hukd_rss',name:'HotUKDeals (RSS)',label:'Community reported
   var m=self.bestMatch(item);if(!m||m.s<.5)return errRecord(item,'hukd_rss','not_found','No matching deal in the '+(self.mode==='live'?'live feed':'snapshot ('+self.snapshotDate()+')')+'.');
   var r=dealToRecord(m.d,m.s);r._match=m.s;return r})}};
 var ADAPTERS=[DemoAdapter,HukdAdapter,ManualAdapter,Stub('awin_feed','Awin product feed','awin_feed'),Stub('awin_promotions','Awin promotions/vouchers','awin_promotions'),Stub('keepa','Keepa (Amazon UK)','keepa')];
-var A=function(id){return ADAPTERS.filter(function(a){return a.id===id})[0]||DemoAdapter};
+var DEF_SRC=WD_DEMO?'demo':'hukd_rss';var A=function(id){return ADAPTERS.filter(function(a){return a.id===id})[0]||A(DEF_SRC)};
 function stripPriv(r){var o={};for(var k in r)if(k.charAt(0)!=='_')o[k]=r[k];return o}
 
 /* ================= State ================= */
-function cleanItem(i){if(!i||typeof i!=='object'||!(+i.orig>=1))return null;i.id=String(i.id||uid());i.name=String(i.name==null?'Item':i.name).slice(0,200);i.url=safeUrl(i.url);i.orig=Math.round(+i.orig);i.cur=i.cur!=null&&+i.cur>=0?Math.round(+i.cur):i.orig;i.pct=Math.min(20,Math.max(10,Math.round(+i.pct)||DEF_PCT));if(A(i.src).id!==i.src||!A(i.src).enabled)i.src='demo';if(!Array.isArray(i.hist))i.hist=[];i.hist=i.hist.filter(function(h){return h&&typeof h.price==='number'});return i}
-function load(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&Array.isArray(d.items)){S=d;S.items=d.items.map(cleanItem).filter(Boolean).slice(0,MAX);S.alerts=Array.isArray(d.alerts)?d.alerts.filter(function(a){return a&&a.text}):[];return}}catch(e){}
- try{var v1=JSON.parse(localStorage.getItem('wishlistDrop.v1'));if(v1&&v1.items){S.items=v1.items.map(function(i){return{id:i.id,name:i.name,url:i.url,orig:toP(i.orig),cur:i.cur==null?toP(i.orig):toP(i.cur),pct:i.pct,src:'demo',hist:(i.hist||[]).map(function(p){return{date:nowIso(),price:toP(p)}}),hit:!!i.hit,example:i.example,added:new Date(i.added||Date.now()).toISOString()}});S.items=S.items.map(cleanItem).filter(Boolean).slice(0,MAX);S.alerts=[];S.seeded=true}}catch(e){}}
+function cleanItem(i){if(!i||typeof i!=='object'||!(+i.orig>=1))return null;i.id=String(i.id||uid());i.name=String(i.name==null?'Item':i.name).slice(0,200);i.url=safeUrl(i.url);i.orig=Math.round(+i.orig);i.cur=i.cur!=null&&+i.cur>=0?Math.round(+i.cur):null;i.pct=Math.min(20,Math.max(10,Math.round(+i.pct)||DEF_PCT));if(A(i.src).id!==i.src||!A(i.src).enabled)i.src=DEF_SRC;if(!Array.isArray(i.hist))i.hist=[];i.hist=i.hist.filter(function(h){return h&&typeof h.price==='number'});return i}
+function load(){load0();sanitizePublic()}
+function load0(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&Array.isArray(d.items)){S=d;d.items.forEach(function(i){if(i&&typeof i==='object'&&i.src==='demo')i._wasDemo=1});S.items=d.items.map(cleanItem).filter(Boolean).slice(0,MAX);S.alerts=Array.isArray(d.alerts)?d.alerts.filter(function(a){return a&&a.text}):[];return}}catch(e){}
+ try{var v1=JSON.parse(localStorage.getItem('wishlistDrop.v1'));if(v1&&v1.items){S.items=v1.items.map(function(i){return{id:i.id,name:i.name,url:i.url,orig:toP(i.orig),cur:i.cur==null?toP(i.orig):toP(i.cur),pct:i.pct,src:'demo',hist:(i.hist||[]).map(function(p){return{date:nowIso(),price:toP(p)}}),hit:!!i.hit,example:i.example,added:new Date(i.added||Date.now()).toISOString()}});S.items.forEach(function(i){i._wasDemo=1});S.items=S.items.map(cleanItem).filter(Boolean).slice(0,MAX);S.alerts=[];S.seeded=true}}catch(e){}}
+/* Public URL: never carry simulated prices over from older DEMO data. Example items are dropped; DEMO-sourced items keep name/link/your price but lose all simulated prices. */
+function sanitizePublic(){S.items.forEach(function(i){var w=i._wasDemo;delete i._wasDemo;if(WD_DEMO)return;
+  if(w||i.src==='hukd_rss'&&!(i.rec&&i.rec.error_state==='ok'&&i.rec.current_price!=null&&i.rec.source==='hukd_rss')){if(w||i.src!=='manual'){i.cur=null;i.pt=null;if(w){i.hist=[];i.rec=null}i.hit=false;i.drop10=false}}
+  i.offers=(i.offers||[]).filter(function(o){return o.label!=='DEMO'});i.hist=(i.hist||[]).filter(function(h){return!(h.price===i.orig&&h.date===i.added)})});
+ if(WD_DEMO)return;S.items=S.items.filter(function(i){return!i.example});S.alerts=S.alerts.filter(function(a){return!/DEMO/.test(a.src||'')});S.auto=false}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storeWarn()}}
 function storeWarn(){var w=document.getElementById('storeWarn');if(w)w.hidden=false}
 function storageOk(){try{var k='__wd_t';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch(e){return false}}
-function targetOf(it){return Math.round(it.orig*(1-it.pct/100))}
-function pillAttr(it){var c=it.cur==null?it.orig:it.cur,g=Math.round((it.orig-c)/it.orig*100);return g>=1?' data-pct=" '+g+'%"':''}
-function status(it){var e=it.rec&&it.rec.error_state;if(e&&e!=='ok')return[{not_found:'Not found',blocked:'Source blocked',changed:'Check source'}[e],'p-e'];if(it.cur==null)return['Watching','p-w'];if(it.cur<=targetOf(it))return['At Target','p-t'];if(it.cur<it.orig)return['Dropped','p-d'];return['Watching','p-w']}
-function mk(name,url,pence,pct,src){return{id:uid(),name:name,url:url||'',orig:pence,cur:pence,pct:pct,src:src||'demo',hist:[],hit:false,added:nowIso(),rec:null}}
-function applyRecord(it,r){it.rec=stripPriv(r);it.match=r._match||null;if(r.error_state==='ok'&&r.current_price!=null){it.cur=r.current_price;it.hist=r.source==='hukd_rss'?(it.hist||[]).concat(it.hist&&it.hist.length&&it.hist[it.hist.length-1].price===r.current_price?[]:[{date:r.fetched_at,price:r.current_price}]).slice(-30):r.price_history.slice(-30)}
- if(!it.hist.length)it.hist=[{date:it.added,price:it.orig}];checkHit(it)}
+/* Honest reference: median of observed prices once we have >=4 observations spanning >=28 days (within 90 days); otherwise the price you entered when adding. Never presented as a verified RRP. */
+function refOf(it){var now=Date.now(),obs=(it.hist||[]).filter(function(h){var t=Date.parse(h.date);return h&&h.price>0&&t&&now-t<=90*864e5&&t<=now+864e5});
+ if(obs.length>=4){var ts=obs.map(function(h){return Date.parse(h.date)}),span=(Math.max.apply(0,ts)-Math.min.apply(0,ts))/864e5;if(span>=28){var p=obs.map(function(h){return h.price}).sort(function(a,b){return a-b}),m=p.length;return{v:m%2?p[(m-1)/2]:Math.round((p[m/2-1]+p[m/2])/2),b:'median',n:m,days:Math.floor(span)}}}
+ return{v:it.orig,b:'added',at:it.added}}
+function refLabel(r){return r.b==='median'?'median of '+r.n+' observed prices over '+r.days+' days':'price when added (you entered'+(r.at?' on '+fmtD(r.at):'')+')'}
+function fmtD(t){var d=new Date(t);return isNaN(d)?'':d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function fmtT(t){var d=new Date(t);return isNaN(d)?'':d.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+function timeHtml(t,verb){return t&&fmtT(t)?'<time datetime="'+esc(t)+'">'+(verb||'checked')+' '+fmtT(t)+'</time>':'<span>check time not recorded</span>'}
+function targetOf(it){return Math.round(refOf(it).v*(1-it.pct/100))}
+function pillAttr(it){if(it.cur==null)return'';var rv=it.ref!=null?it.ref:refOf(it).v,g=Math.round((rv-it.cur)/rv*100);return g>=1?' data-pct=" '+g+'%"':''}
+function status(it){var e=it.rec&&it.rec.error_state;if(e==='not_found'&&it.cur==null)return['Watching','p-w'];if(e&&e!=='ok')return[{not_found:'Not found',blocked:'Source blocked',changed:'Check source'}[e],'p-e'];if(it.cur==null)return['Watching','p-w'];var rv=it.ref!=null?it.ref:refOf(it).v;if(it.cur<=Math.round(rv*(1-it.pct/100)))return['At Target','p-t'];if(it.cur<rv)return['Dropped','p-d'];return['Watching','p-w']}
+function mk(name,url,pence,pct,src){src=src||DEF_SRC;return{id:uid(),name:name,url:url||'',orig:pence,cur:src==='demo'||src==='manual'?pence:null,pct:pct,src:src,hist:[],hit:false,added:nowIso(),rec:null}}
+function applyRecord(it,r){it.rec=stripPriv(r);it.match=r._match||null;if(r.error_state==='ok'&&r.current_price!=null){it.cur=r.current_price;it.pt={s:srcName(r),r:r.retailer,t:nowIso(),posted:r.source==='hukd_rss'?r.fetched_at:null};it.hist=r.source==='hukd_rss'?(it.hist||[]).concat(it.hist&&it.hist.length&&it.hist[it.hist.length-1].price===r.current_price?[]:[{date:r.fetched_at,price:r.current_price}]).slice(-30):r.price_history.slice(-30)}
+ checkHit(it)}
 function checkHit(it){var ok=it.rec&&it.rec.error_state==='ok';var at=ok&&it.cur!=null&&it.cur<=targetOf(it);
  if(at&&!it.hit){var src=it.rec.source==='hukd_rss'?'HotUKDeals (community reported)':(it.rec.label==='DEMO'?'DEMO (simulated)':'Manual');
-  S.alerts.unshift({id:uid(),t:nowIso(),url:it.url||'',src:src,text:it.name+' hit your '+it.pct+'% target: now '+gbp(it.cur)+' (was '+gbp(it.orig)+', target '+gbp(targetOf(it))+').'+(it.rec.promo_code?' Community-reported code: '+it.rec.promo_code+'.':'')});S.alerts=S.alerts.slice(0,100)}
+  var rf=refOf(it);S.alerts.unshift({id:uid(),t:nowIso(),url:it.url||'',src:src,text:it.name+' hit your '+it.pct+'% target: now '+gbp(it.cur)+' (reference '+gbp(rf.v)+', '+(rf.b==='median'?'observed median':'price when added, you entered')+'; target '+gbp(targetOf(it))+').'+(it.rec.promo_code?' Community-reported code: '+it.rec.promo_code+'.':'')});S.alerts=S.alerts.slice(0,100)}
  if(ok)it.hit=at}
 var COMPARE=['demo','hukd_rss','awin_feed','awin_promotions','keepa'];
 function offersFrom(a,it,opts){return a.getOffers?a.getOffers(it,opts):a.getPrice(it,opts).then(function(r){return[r]})}
@@ -339,19 +360,19 @@ function refreshItem(it,opts){var prim=A(it.src);return prim.getPrice(it,opts).t
  return Promise.all(srcs.map(function(id){return offersFrom(A(id),it,id===it.src?{}:opts).catch(function(){return[]})})).then(function(all){
   var offers=[].concat.apply([],all).filter(function(o){return o.error_state==='ok'&&o.current_price!=null}).map(stripPriv);
   if(r.error_state==='ok'&&r.current_price!=null&&!offers.some(function(o){return o.product_id===r.product_id}))offers.push(stripPriv(r));
-  offers.sort(function(a,b){return a.current_price-b.current_price});it.offers=offers;checkDrop(it);return r})})}
+  offers.sort(function(a,b){return a.current_price-b.current_price});it.offers=offers;it.offersAt=nowIso();checkDrop(it);return r})})}
 function bestOffer(it){return it.offers&&it.offers[0]||null}
-function gapPct(it){var b=bestOffer(it);return b?(it.orig-b.current_price)/it.orig*100:0}
-function srcName(o){return o.source==='hukd_rss'?'HotUKDeals, community reported':o.label==='DEMO'?'DEMO, simulated':o.source}
+function gapPct(it){var b=bestOffer(it),rv=refOf(it).v;return b?(rv-b.current_price)/rv*100:0}
+function srcName(o){return o.source==='hukd_rss'?'HotUKDeals, community reported':o.label==='DEMO'?'DEMO, simulated':o.source==='manual'?'entered by you':o.source}
 function checkDrop(it){var g=gapPct(it),b=bestOffer(it),on=g>=10;
- if(on&&!it.drop10){S.alerts.unshift({id:uid(),t:nowIso(),url:it.url||'',src:srcName(b),text:'\u2193 '+it.name+' is '+g.toFixed(0)+'% below RRP: '+gbp(b.current_price)+' at '+b.retailer+' (RRP '+gbp(it.orig)+').'})}
+ if(on&&!it.drop10){var rf=refOf(it);S.alerts.unshift({id:uid(),t:nowIso(),url:it.url||'',src:srcName(b),text:'\u2193 '+it.name+' is '+g.toFixed(0)+'% below its reference: '+gbp(b.current_price)+' at '+b.retailer+' (reference '+gbp(rf.v)+', '+(rf.b==='median'?'observed median':'price when added, you entered')+').'})}
  it.drop10=on}
 function refreshAll(opts){return Promise.all(S.items.map(function(it){return refreshItem(it,opts)})).then(function(){save();render()})}
-function simulate(){return refreshAll({step:true})}
-function seed(){var ex=[mk("Levi's 501 Original Fit Jeans (example)",'',9000,15,'hukd_rss'),mk('Noise-cancelling Headphones (example)','https://example.com/headphones',27900,20,'demo'),mk('Espresso Machine (example)','https://example.com/espresso',18999,15,'demo')];
- ex.forEach(function(e){e.example=true;var p=e.orig,t=Date.now()-6*864e5;e.hist=[{date:new Date(t).toISOString().replace(/\.\d{3}Z$/,'Z'),price:p}];for(var i=1;i<6;i++){p=Math.round(Math.max(p*(1+(Math.random()*.06-.035)),e.orig*.8));e.hist.push({date:new Date(t+i*864e5).toISOString().replace(/\.\d{3}Z$/,'Z'),price:p})}e.cur=e.src==='demo'?p:e.orig});
+function simulate(){if(!WD_DEMO)return Promise.resolve();return refreshAll({step:true})}
+function seed(){if(!WD_DEMO)return Promise.resolve();var ex=[mk("Levi's 501 Original Fit Jeans (example)",'',9000,15,'hukd_rss'),mk('Noise-cancelling Headphones (example)','https://example.com/headphones',27900,20,'demo'),mk('Espresso Machine (example)','https://example.com/espresso',18999,15,'demo')];
+ ex.forEach(function(e){e.example=true;var p=e.orig,t=Date.now()-6*864e5;e.hist=[{date:new Date(t).toISOString().replace(/\.\d{3}Z$/,'Z'),price:p}];for(var i=1;i<6;i++){p=Math.round(Math.max(p*(1+(Math.random()*.06-.035)),e.orig*.8));e.hist.push({date:new Date(t+i*864e5).toISOString().replace(/\.\d{3}Z$/,'Z'),price:p})}if(e.src==='demo')e.cur=p;else{e.cur=null;e.hist=[]}});
  S.items=S.items.concat(ex).slice(0,MAX);S.seeded=true;return Promise.all(ex.map(function(e){return refreshItem(e)}))}
-window.WD={simulate:simulate,refreshAll:refreshAll,state:function(){return S},nameFromUrl:nameFromUrl,adapters:ADAPTERS,parseRss:parseRss,dealToRecord:dealToRecord,codesFrom:codesFrom,matchScore:matchScore,pound2p:pound2p,demoErr:demoErr};
+window.WD={demo:WD_DEMO,refOf:function(it){return refOf(it)},simulate:simulate,refreshAll:refreshAll,state:function(){return S},nameFromUrl:nameFromUrl,adapters:ADAPTERS,parseRss:parseRss,dealToRecord:dealToRecord,codesFrom:codesFrom,matchScore:matchScore,pound2p:pound2p,demoErr:demoErr};
 
 /* ================= In-app dialogs (no prompt/confirm: blocked in in-app browsers) ================= */
 var dlgQ=Promise.resolve();
@@ -367,20 +388,20 @@ WD.ask=ask;
 
 /* ================= Form ================= */
 var mode='pct',editing=null;
-ADAPTERS.forEach(function(a){var o=document.createElement('option');o.value=a.id;o.textContent=a.name+(a.enabled?'':' (awaiting approval)')+(a.id==='hukd_rss'?' (community reported)':'');o.disabled=!a.enabled;$('srcSel').appendChild(o)});
+ADAPTERS.forEach(function(a){if(a.id==='demo'&&!WD_DEMO)return;var o=document.createElement('option');o.value=a.id;o.textContent=a.name+(a.enabled?'':' (awaiting approval)')+(a.id==='hukd_rss'?' (community reported)':'');o.disabled=!a.enabled;$('srcSel').appendChild(o)});
 function srcHint(){var a=A($('srcSel').value);$('srcHint').textContent=a.note||(a.id==='hukd_rss'?'Matches your item name against HotUKDeals posts. Prices and codes are community reported. Offline: snapshot from '+HukdAdapter.snapshotDate()+'.':'')}
 HukdAdapter.note='Fuzzy-matches your item name to HotUKDeals posts. Community reported. Offline: uses snapshot from '+HukdAdapter.snapshotDate()+'.';
 $('srcSel').onchange=srcHint;
 function setMode(m){mode=m;$('modePct').setAttribute('aria-pressed',m=='pct');$('modeAbs').setAttribute('aria-pressed',m=='abs');$('pctWrap').hidden=m!='pct';$('absWrap').hidden=m!='abs';
  var p=+$('price').value;if(m=='abs'&&p>0&&!$('abs').value)$('abs').value=(p*(1-$('pct').value/100)).toFixed(2);conv()}
 function conv(){var p=+$('price').value,t=$('conv');$('pctOut').textContent=$('pct').value+'%';if(!(p>0)){t.textContent='';return}
- if(mode=='pct'){t.textContent='= target price '+gbp(Math.round(toP(p)*(1-$('pct').value/100)))}else{var a=+$('abs').value;if(a>0){var pc=(1-a/p)*100;t.textContent='= '+pc.toFixed(1)+'% off'+(pc<10?' (minimum is 10%, so we\u2019ll use 10%)':pc>20?' (maximum is 20%, so we\u2019ll use 20%)':'')}else t.textContent=''}}
+ if(mode=='pct'){t.textContent='= target price '+gbp(Math.round(toP(p)*(1-$('pct').value/100)))+' ('+$('pct').value+'% off the price you entered)'}else{var a=+$('abs').value;if(a>0){var pc=(1-a/p)*100;t.textContent='= '+pc.toFixed(1)+'% off'+(pc<10?' (minimum is 10%, so we\u2019ll use 10%)':pc>20?' (maximum is 20%, so we\u2019ll use 20%)':'')}else t.textContent=''}}
 function msg(el,txt,kind){el.textContent=txt;el.className='msg show '+kind;clearTimeout(el._t);el._t=setTimeout(function(){el.className='msg'},6000)}
 $('modePct').onclick=function(){setMode('pct')};$('modeAbs').onclick=function(){setMode('abs')};
 ['pct','price','abs'].forEach(function(i){$(i).addEventListener('input',conv)});
 $('what').addEventListener('input',function(){var v=this.value.trim();if(isUrl(v)){$('nameWrap').hidden=false;if(!$('name')._touched)$('name').value=nameFromUrl(v);$('whatHint').textContent='Link detected. We filled in a name; edit it if you like.'}else{$('nameWrap').hidden=true;$('whatHint').textContent='Links get a readable name automatically.'}});
 $('name').addEventListener('input',function(){this._touched=true});
-function resetForm(){$('form').reset();$('pct').value=DEF_PCT;$('srcSel').value='demo';$('name')._touched=false;$('nameWrap').hidden=true;editing=null;$('formTitle').textContent='Add new drop';$('submitBtn').textContent='Add drop';$('cancelEdit').hidden=true;setMode('pct');$('abs').value='';conv();srcHint()}
+function resetForm(){$('form').reset();$('pct').value=DEF_PCT;$('srcSel').value=DEF_SRC;$('name')._touched=false;$('nameWrap').hidden=true;editing=null;$('formTitle').textContent='Add new drop';$('submitBtn').textContent='Add drop';$('cancelEdit').hidden=true;setMode('pct');$('abs').value='';conv();srcHint()}
 $('cancelEdit').onclick=resetForm;
 $('form').onsubmit=function(e){e.preventDefault();var v=$('what').value.trim();var price=+$('price').value,url0='',name0=v;if(v&&isUrl(v))name0=$('name').value.trim()||nameFromUrl(v);
  if(v&&!(price>0)&&(editing||S.items.length<MAX)){askPrice('What does \u201c'+name0+'\u201d cost right now? (£)').then(function(pp){if(!(pp>0)){msg($('msg'),'We need a current price to watch it. Add one above.','warn');$('price').focus();return}$('price').value=pp;submitNow()});return}
@@ -396,7 +417,7 @@ function submitNow(){var v=$('what').value.trim();
  if(editing&&!S.items.some(function(x){return x.id==editing}))editing=null;
  if(!editing&&S.items.length>=MAX){msg($('msg'),'Your list is full (10 items max). Remove one to make room.','warn');return}
  if(editing){it=S.items.find(function(x){return x.id==editing});it.name=name;it.url=url;if(it.orig!==pence){it.orig=pence;it.cur=pence;it.hist=[]}it.pct=pct;it.src=src;it.hit=false;var okMsg='Saved changes \u2713'}
- else{it=mk(name,url,pence,pct,src);S.items.push(it);okMsg='Added \u201c'+name+'\u201d: watching for '+pct+'% off ('+gbp(targetOf(it))+') \u2713'}
+ else{it=mk(name,url,pence,pct,src);S.items.push(it);okMsg='Added \u201c'+name+'\u201d: watching for '+pct+'% off your reference \u2713'}
  S.started=true;resetForm();msg($('msg'),okMsg,'good');render();refreshItem(it).then(function(){save();render()})}
 
 /* ================= Render ================= */
@@ -411,40 +432,42 @@ function srcTags(it){var r=it.rec,a=A(it.src),t=[];
  if(r&&r.error_state==='ok')t.push('<span class="tag" title="Confidence">'+Math.round(r.confidence*100)+'% confidence</span>');
  return '<div class="tags">'+t.join('')+'</div>'}
 function errBox(it){var r=it.rec;if(!r)return'';var d=esc(r.error_detail||'');
+ if(r.error_state==='not_found'&&it.cur==null)return'<div class="err nolive" role="status"><b>No live price yet</b> '+d+' We\u2019ll keep checking. <br><button data-a="manual">Enter a price I\u2019ve seen</button> <button data-a="src">Try another source</button></div>';
  if(r.error_state==='not_found')return'<div class="err not_found" role="status"><b>No price found</b>'+d+' Showing your last known price.<br><button data-a="manual">Enter price myself</button> <button data-a="src">Try another source</button></div>';
  if(r.error_state==='blocked')return'<div class="err blocked" role="status"><b>Source blocked</b>'+d+' Alerts are paused for this item.<br><button data-a="retry">Retry</button> <button data-a="src">Switch source</button></div>';
  if(r.error_state==='changed')return'<div class="err changed" role="status"><b>Source changed</b>'+d+' The price may be wrong, so alerts are paused.<br><button data-a="retry">Retry</button> <button data-a="manual">Enter price myself</button></div>';
  if(r.confidence<.5)return'<div class="err low"><b>Low-confidence match</b>Double-check the deal below before buying.</div>';return''}
-function cmpBox(it){var o=it.offers||[];if(!o.length)return'';var b=o[0],g=gapPct(it);
- return'<div class="cmp"><div class="cmph"><b>Cheapest: '+gbp(b.current_price)+' at '+esc(b.retailer)+'</b>'+(g>=10?'<span class="pill p-t">\u2193 '+g.toFixed(0)+'% off RRP</span>':'<span class="pill p-w">'+(g>0?g.toFixed(0)+'% off':g<0?Math.abs(g).toFixed(0)+'% above':'at')+' RRP</span>')+'</div>'+
- '<ul>'+o.map(function(x,i){var d=(x.current_price-it.orig)/it.orig*100;return'<li'+(i==0?' class="best"':'')+'><span>'+esc(x.retailer)+' <span class="small">('+esc(srcName(x))+')</span></span><span>'+gbp(x.current_price)+' <span class="small">'+(d>0?'+':'')+d.toFixed(0)+'%</span></span></li>'}).join('')+'</ul><div class="small">RRP = the price you entered ('+gbp(it.orig)+'). Alerts fire at \u226510% below RRP.</div></div>'}
+function cmpBox(it){var o=it.offers||[];if(!o.length)return'';var b=o[0],g=gapPct(it),rf=refOf(it);
+ return'<div class="cmp pr" data-kind="obs"><div class="cmph"><b>Cheapest: '+gbp(b.current_price)+' at '+esc(b.retailer)+'</b>'+(g>=10?'<span class="pill p-t">\u2193 '+g.toFixed(0)+'% below ref</span>':'<span class="pill p-w">'+(g>0?g.toFixed(0)+'% below':g<0?Math.abs(g).toFixed(0)+'% above':'at')+' ref</span>')+'</div>'+
+ '<ul>'+o.map(function(x,i){var d=(x.current_price-rf.v)/rf.v*100;return'<li class="pr'+(i==0?' best':'')+'" data-kind="obs"><span>'+esc(x.retailer)+' <span class="small srcb">('+esc(srcName(x))+' \u00b7 '+timeHtml(it.offersAt||x.fetched_at)+')</span></span><span>'+gbp(x.current_price)+' <span class="small">'+(d>0?'+':'')+d.toFixed(0)+'%</span></span></li>'}).join('')+'</ul><div class="small">Reference: '+gbp(rf.v)+', '+esc(refLabel(rf))+(rf.b==='added'?'. Not a verified RRP':'')+'. Alerts fire at \u226510% below the reference.</div></div>'}
 function dealBox(it){var r=it.rec;if(!r||r.source!=='hukd_rss'||r.error_state!=='ok')return'';
- return'<div class="deal">Matched deal: <a href="'+esc(safeUrl(r.canonical_url)||'https://www.hotukdeals.com/')+'" target="_blank" rel="noopener">'+esc(r.title)+'</a> at <b>'+esc(r.retailer)+'</b>, posted '+new Date(r.fetched_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})+(r.promo_code?'<br>Code (community reported, unverified): <b>'+esc(r.promo_code)+'</b>':'')+'</div>'}
+ return'<div class="deal pr" data-kind="obs"><span class="srcb">HotUKDeals, community reported</span> \u00b7 '+timeHtml(it.pt&&it.pt.t,'checked')+'<br>Matched deal: <a href="'+esc(safeUrl(r.canonical_url)||'https://www.hotukdeals.com/')+'" target="_blank" rel="noopener">'+esc(r.title)+'</a> at <b>'+esc(r.retailer)+'</b>, posted '+new Date(r.fetched_at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})+(r.promo_code?'<br>Code (community reported, unverified): <b>'+esc(r.promo_code)+'</b>':'')+'</div>'}
 function render(){$('count').textContent=S.items.length+'/10';$('welcome').hidden=!!S.started;var c=$('cards');
- c.innerHTML=S.items.length?'':'<p class="empty">Nothing here yet. Add something above, or load the examples.</p>';
- S.items.forEach(function(it){var t=targetOf(it),cur=it.cur==null?it.orig:it.cur,ch=(cur-it.orig)/it.orig*100,st=status(it),prog=Math.max(0,Math.min(100,(it.orig-cur)/(it.orig-t)*100));
+ c.innerHTML=S.items.length?'':'<p class="empty">'+(WD_DEMO?'Nothing here yet. Add something above, or load the examples.':'Nothing here yet. Add something above.')+'</p>';
+ S.items.forEach(function(it){var rf=refOf(it),t=targetOf(it),has=it.cur!=null,cur=it.cur,ch=has?(cur-rf.v)/rf.v*100:0,st=status(it),prog=has?Math.max(0,Math.min(100,(rf.v-cur)/(rf.v-t)*100)):0;
   var d=document.createElement('div');d.className='card';d.dataset.id=it.id;
   d.innerHTML='<div class="ct"><div><h3>'+esc(it.name)+'</h3>'+(safeUrl(it.url)?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener">'+esc(it.url.replace(/^https?:\/\//,'').slice(0,40))+'</a>':'')+srcTags(it)+'</div><span class="pill '+st[1]+'"'+(st[1]=='p-d'||st[1]=='p-t'?pillAttr(it):'')+'>'+st[0]+'</span></div>'+
-  '<div class="stats"><div>Price<b>'+gbp(cur)+'</b></div><div>RRP<b>'+gbp(it.orig)+'</b></div><div>% off<b class="'+(ch<0?'down':ch>0?'up':'')+'">'+(ch<0?(-ch).toFixed(0)+'% off':ch>0?'+'+ch.toFixed(1)+'%':'0% off')+'</b></div><div>Target −'+it.pct+'%<b>'+gbp(t)+'</b></div></div>'+
+  '<div class="pr" data-kind="'+(has?'obs':'ref')+'"><div class="stats"><div>Price<b'+(has?'':' class="nolive"')+'>'+(has?gbp(cur):'—')+'</b></div><div>Reference<b>'+gbp(rf.v)+'</b></div><div>% off<b class="'+(ch<0?'down':ch>0?'up':'')+'">'+(!has?'—':ch<0?(-ch).toFixed(0)+'% off':ch>0?'+'+ch.toFixed(1)+'%':'0% off')+'</b></div><div>Target −'+it.pct+'%<b>'+gbp(t)+'</b></div></div>'+
   '<div class="bar'+(prog>=100?' done':'')+'" role="progressbar" aria-label="Progress to target" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(prog)+'"><i style="width:'+prog+'%"></i></div>'+
+  '<p class="srcline">'+(has?'<span class="srcb">Price: '+esc(it.pt?it.pt.s+(it.pt.r&&it.pt.r!=='\u2014'?' \u00b7 '+it.pt.r:''):srcLabel(it.src))+'</span> \u00b7 '+timeHtml(it.pt&&it.pt.t):'<span class="srcb">Watching — no live price yet</span>')+'<br>Reference: '+esc(refLabel(rf))+(rf.b==='added'?'. Not a verified RRP':'')+'. % off is vs this reference.</p></div>'+
   errBox(it)+cmpBox(it)+dealBox(it)+
   buyHtml(it.url,'card')+'<div class="foot">'+spark(it.hist||[],t)+'<div class="row" style="flex:0"><button data-a="edit" aria-label="Edit '+esc(it.name)+'">Edit</button><button class="danger" data-a="del" aria-label="Delete '+esc(it.name)+'">Delete</button></div></div>';c.appendChild(d)});
- $('feed').innerHTML=S.alerts.length?S.alerts.map(function(a){return'<div class="alert">'+esc(a.text)+'<time datetime="'+a.t+'">'+new Date(a.t).toLocaleString('en-GB')+' · '+esc(a.src||'DEMO')+'</time>'+buyHtml(a.url,'alert')+'</div>'}).join(''):'<p class="empty">No alerts yet. Try \u201cSimulate a day\u201d.</p>';
+ $('feed').innerHTML=S.alerts.length?S.alerts.map(function(a){return'<div class="alert pr" data-kind="obs">'+esc(a.text)+'<time datetime="'+a.t+'">'+new Date(a.t).toLocaleString('en-GB')+' · <span class="srcb">'+esc(a.src||'source not recorded')+'</span></time>'+buyHtml(a.url,'alert')+'</div>'}).join(''):'<p class="empty">'+(WD_DEMO?'No alerts yet. Try \u201cSimulate a day\u201d.':'No alerts yet. We\u2019ll add one here when a tracked price is 10%+ below its reference or hits your target.')+'</p>';
  $('badge').textContent=S.alerts.length?'('+S.alerts.length+')':'';
  $('topList').innerHTML=topHtml(shareList());
- $('seedBtn').hidden=S.items.some(function(i){return i.example});
- $('srcList').innerHTML=ADAPTERS.map(function(a){var s=a.enabled?'<span class="pill p-t">On</span>':'<span class="pill p-w">Awaiting approval</span>';var n=a.id==='hukd_rss'?esc(a.detail||'Loading…'):esc(a.note||'');if(a.id==='hukd_rss')s=a.mode==='live'?'<span class="pill p-t">Live</span>':a.mode==='snapshot'?'<span class="pill p-d">Snapshot '+a.snapshotDate()+'</span>':a.mode==='changed'?'<span class="pill p-e">Changed</span>':'<span class="pill p-w">Loading</span>';
+ $('seedBtn').hidden=!WD_DEMO||S.items.some(function(i){return i.example});
+ $('srcList').innerHTML=ADAPTERS.filter(function(a){return a.id!=='demo'||WD_DEMO}).map(function(a){var s=a.enabled?'<span class="pill p-t">On</span>':'<span class="pill p-w">Awaiting approval</span>';var n=a.id==='hukd_rss'?esc(a.detail||'Loading…'):esc(a.note||'');if(a.id==='hukd_rss')s=a.mode==='live'?'<span class="pill p-t">Live</span>':a.mode==='snapshot'?'<span class="pill p-d">Snapshot '+a.snapshotDate()+'</span>':a.mode==='changed'?'<span class="pill p-e">Changed</span>':'<span class="pill p-w">Loading</span>';
   return'<div class="src'+(a.enabled?'':' off')+'"><div><b>'+esc(a.name)+'</b>'+(a.label?' <span class="tag '+(a.id==='demo'?'demo':'comm')+'">'+esc(a.label)+'</span>':'')+'<div class="small">'+n+'</div></div>'+s+'</div>'}).join('')}
-function shareList(){return S.items.map(function(i){return{n:i.name,u:i.url,o:i.orig,c:i.cur==null?i.orig:i.cur,p:i.pct,s:i.src,e:i.rec?i.rec.error_state:'ok'}})}
-function rank(list){return list.slice().sort(function(a,b){return(a.c/(a.o*(1-a.p/100)))-(b.c/(b.o*(1-b.p/100)))})}
-function stOf(x){return status({orig:x.o,cur:x.c,pct:x.p,rec:{error_state:x.e||'ok'}})}
-function srcLabel(s){return s==='hukd_rss'?'community reported':s==='demo'?'DEMO':s==='manual'?'manual':'n/a'}
-function topHtml(list){if(!list.length)return'<li class="empty" style="display:block">No items yet.</li>';return rank(list).map(function(x){var st=stOf(x);return'<li><div class="g"><b class="tn" title="'+esc(x.n)+'">'+esc(x.n)+'</b><div class="tm"><span class="pill '+st[1]+'"'+(st[1]=='p-d'||st[1]=='p-t'?pillAttr({orig:x.o,cur:x.c}):'')+'>'+st[0]+'</span><span class="tp">'+gbp(x.c)+'</span><span class="small">RRP '+gbp(x.o)+' · target '+gbp(Math.round(x.o*(1-x.p/100)))+' · '+srcLabel(x.s)+'</span></div>'+buyHtml(x.u,'top')+'</div></li>'}).join('')}
+function shareList(){return S.items.map(function(i){var rf=refOf(i);return{n:i.name,u:i.url,o:i.orig,c:i.cur,p:i.pct,s:i.src,e:i.rec?i.rec.error_state:'ok',r:rf.v,b:rf.b,t:i.cur!=null?(i.pt&&i.pt.t)||null:null}})}
+function rank(list){var k=function(x){return x.c==null?1e9:x.c/((x.r||x.o)*(1-x.p/100))};return list.slice().sort(function(a,b){return k(a)-k(b)})}
+function stOf(x){return status({orig:x.o,ref:x.r||x.o,cur:x.c,pct:x.p,rec:{error_state:x.e||'ok'}})}
+function srcLabel(s){return s==='hukd_rss'?'HotUKDeals, community reported':s==='demo'?'DEMO, simulated':s==='manual'?'entered by you':'source n/a'}
+function topHtml(list){if(!list.length)return'<li class="empty" style="display:block">No items yet.</li>';return rank(list).map(function(x){var st=stOf(x),rv=x.r||x.o,has=x.c!=null;return'<li class="pr" data-kind="'+(has?'obs':'ref')+'"><div class="g"><b class="tn" title="'+esc(x.n)+'">'+esc(x.n)+'</b><div class="tm"><span class="pill '+st[1]+'"'+(st[1]=='p-d'||st[1]=='p-t'?pillAttr({orig:x.o,ref:rv,cur:x.c}):'')+'>'+st[0]+'</span>'+(has?'<span class="tp">'+gbp(x.c)+'</span>':'')+'<span class="small srcb">'+(has?esc(srcLabel(x.s))+' \u00b7 '+timeHtml(x.t):'No live price yet')+' \u00b7 vs '+gbp(rv)+' '+(x.b==='median'?'observed median':'you entered')+' \u00b7 target '+gbp(Math.round(rv*(1-x.p/100)))+'</span></div>'+buyHtml(x.u,'top')+'</div></li>'}).join('')}
 $('cards').onclick=function(e){var b=e.target.closest('button');if(!b)return;var id=b.closest('.card').dataset.id,it=S.items.find(function(x){return x.id==id}),a=b.dataset.a;
  if(a=='del'){ask('Delete \u201c'+it.name+'\u201d?',{ok:'Delete',danger:true}).then(function(y){if(!y)return;S.items=S.items.filter(function(x){return x.id!=id});if(editing==id)resetForm();save();render()})}
  else if(a=='retry'){refreshItem(it).then(function(){save();render()})}
  else if(a=='manual'){askPrice('Current price for \u201c'+it.name+'\u201d (£)').then(function(v){if(v>0){it.src='manual';it.cur=toP(v);delete demoErr[it.id];it.hist=(it.hist||[]).concat([{date:nowIso(),price:it.cur}]);refreshItem(it).then(function(){save();render()})}})}
- else if(a=='src'||a=='edit'){editing=id;$('what').value=it.url||it.name;$('nameWrap').hidden=!it.url;$('name').value=it.name;$('name')._touched=true;$('price').value=(it.orig/100).toFixed(2);$('pct').value=it.pct;$('srcSel').value=A(it.src).enabled?it.src:'demo';setMode('pct');srcHint();$('formTitle').textContent='Edit drop';$('submitBtn').textContent='Save changes';$('cancelEdit').hidden=false;$('form').scrollIntoView({behavior:'smooth'});(a=='src'?$('srcSel'):$('what')).focus()}};
+ else if(a=='src'||a=='edit'){editing=id;$('what').value=it.url||it.name;$('nameWrap').hidden=!it.url;$('name').value=it.name;$('name')._touched=true;$('price').value=(it.orig/100).toFixed(2);$('pct').value=it.pct;$('srcSel').value=A(it.src).enabled?it.src:DEF_SRC;setMode('pct');srcHint();$('formTitle').textContent='Edit drop';$('submitBtn').textContent='Save changes';$('cancelEdit').hidden=false;$('form').scrollIntoView({behavior:'smooth'});(a=='src'?$('srcSel'):$('what')).focus()}};
 $('simBtn').onclick=simulate;var timer;$('auto').onchange=function(){clearInterval(timer);S.auto=this.checked;save();if(this.checked)timer=setInterval(simulate,2000)};
 $('refreshBtn').onclick=function(){HukdAdapter.init(true).then(function(){return refreshAll()})};
 $('seedBtn').onclick=function(){if(S.items.length+3>MAX){msg($('msg'),'Not enough room for 3 examples (10 max).','warn');return}seed().then(function(){save();render()})};
@@ -457,7 +480,7 @@ $('tabs').addEventListener('keydown',function(e){var t=[].slice.call(this.childr
 
 /* ================= Share link ================= */
 function enc(list){return btoa(unescape(encodeURIComponent(JSON.stringify({v:2,i:list})))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
-function dec(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var o=JSON.parse(decodeURIComponent(escape(atob(s))));if(o.v===1)o.i=o.i.map(function(x){return{n:x.n,u:x.u,o:toP(x.o),c:toP(x.c),p:x.p,s:'demo'}});if(!Array.isArray(o.i))throw new Error('bad list');var E={ok:1,not_found:1,blocked:1,changed:1};return o.i.filter(function(x){return x&&typeof x==='object'&&+x.o>=1}).slice(0,MAX).map(function(x){var o2=Math.round(+x.o),c=x.c!=null&&+x.c>=0?Math.round(+x.c):o2;return{n:String(x.n==null?'Item':x.n).slice(0,200),u:safeUrl(x.u),o:o2,c:c,p:Math.min(20,Math.max(10,Math.round(+x.p)||DEF_PCT)),s:['demo','hukd_rss','manual'].indexOf(x.s)>=0?x.s:'demo',e:E[x.e]?x.e:'ok'}})}
+function dec(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';var o=JSON.parse(decodeURIComponent(escape(atob(s))));if(o.v===1)o.i=o.i.map(function(x){return{n:x.n,u:x.u,o:toP(x.o),c:toP(x.c),p:x.p,s:'demo'}});if(!Array.isArray(o.i))throw new Error('bad list');var E={ok:1,not_found:1,blocked:1,changed:1};return o.i.filter(function(x){return x&&typeof x==='object'&&+x.o>=1}).slice(0,MAX).map(function(x){var o2=Math.round(+x.o),c=x.c===null?null:x.c!=null&&+x.c>=0?Math.round(+x.c):o2,r=+x.r>=1?Math.round(+x.r):o2,t=typeof x.t==='string'&&!isNaN(Date.parse(x.t))?x.t.slice(0,30):null;return{n:String(x.n==null?'Item':x.n).slice(0,200),u:safeUrl(x.u),o:o2,c:c,p:Math.min(20,Math.max(10,Math.round(+x.p)||DEF_PCT)),s:['demo','hukd_rss','manual'].indexOf(x.s)>=0?x.s:'demo',e:E[x.e]?x.e:'ok',r:r,b:x.b==='median'?'median':'added',t:t}})}
 function shareUrl(){return location.href.split('#')[0]+'#list='+enc(rank(shareList()))}
 WD.shareUrl=shareUrl;WD.decode=dec;
 $('copyBtn').onclick=function(){if(!S.items.length){msg($('shareMsg'),'Add a drop first.','warn');return}var u=shareUrl();history.replaceState(null,'','#'+u.split('#')[1]);
@@ -480,27 +503,27 @@ function drawCard(){var cv=$('card'),x=cv.getContext('2d'),W=1080,H=1350,list=ra
  list.forEach(function(it,i){var st=stOf(it),cy=y+rowH/2;
   x.fillStyle=v('--rank');if(th==='drop'||th==='default'){rr(x,v('--rank'),82,cy-26,52,52,8)}else{x.beginPath();x.arc(108,cy,26,0,7);x.fill()}x.fillStyle=v('--rank-ink');x.font=fx+' 28px '+F;x.textAlign='center';x.fillText(i+1,108,cy+10);x.textAlign='left';
   x.fillStyle=v('--ink');x.font=fh+' 32px '+F;x.fillText(fit(x,it.n,540),156,cy-6);
-  x.fillStyle=v('--mut');x.font='500 24px '+F;x.fillText(fit(x,'Now '+gbp(it.c)+' · RRP '+gbp(it.o)+' · target '+gbp(Math.round(it.o*(1-it.p/100)))+' · '+srcLabel(it.s),540),156,cy+28);
+  x.fillStyle=v('--mut');x.font='500 24px '+F;var rv=it.r||it.o;x.fillText(fit(x,(it.c!=null?'Now '+gbp(it.c)+' ('+srcLabel(it.s)+(it.t?', '+fmtD(it.t):'')+')':'No live price yet')+' · vs '+gbp(rv)+' '+(it.b==='median'?'median':'you entered'),560),156,cy+28);
   var col={'p-t':[v('--pt-bg'),v('--pt-ink')],'p-d':[v('--pd-bg'),v('--pd-ink')],'p-w':[v('--pw-bg'),v('--pw-ink')],'p-e':[v('--badbg'),v('--bad')]}[st[1]];
   var gp=Math.round((it.o-it.c)/it.o*100),lab=st[0]+((st[1]=='p-d'||st[1]=='p-t')&&gp>=1?' '+gp+'%':'');if(UP)lab=lab.toUpperCase();
   x.font=(BOLD?'900 ':'800 ')+'24px '+F;var tw=x.measureText(lab).width+36;rr(x,col[0],W-96-tw,cy-24,tw,48,RP);if(!BOLD||st[1]=='p-w'){x.lineWidth=2;x.strokeStyle=col[1];x.stroke()}x.fillStyle=col[1];x.fillText(lab,W-96-tw+18,cy+9);
   if(i<list.length-1){x.fillStyle=v('--line');x.fillRect(96,y+rowH-1,W-192,2)}y+=rowH});
- rr(x,v('--demo-bg'),48,H-128,W-96,80,Math.min(20,R));x.fillStyle=v('--demo-ink');x.font='700 26px '+F;x.textAlign='center';x.fillText('DEMO prices are simulated · HotUKDeals prices are community reported',W/2,H-78);x.textAlign='left';
+ rr(x,v('--demo-bg'),48,H-128,W-96,80,Math.min(20,R));x.fillStyle=v('--demo-ink');x.font='700 26px '+F;x.textAlign='center';x.fillText(WD_DEMO?'DEMO prices are simulated · HotUKDeals prices are community reported':'BETA · Prices from HotUKDeals (community reported) or entered by me',W/2,H-78);x.textAlign='left';
  cv.hidden=false;$('cardActions').hidden=false;return cv}
 WD.drawCard=drawCard;
 function cardBlob(cb){drawCard().toBlob(cb,'image/png')}
 $('cardBtn').onclick=function(){var go=this;if(document.fonts&&document.fonts.ready&&!go._f){go._f=1;document.fonts.ready.then(function(){go.onclick();go._f=0});return}if(!S.items.length){msg($('shareMsg'),'Add a drop first.','warn');return}drawCard();
  cardBlob(function(b){var f=window.File&&new File([b],'drop-club-top10.png',{type:'image/png'});$('shareBtn').hidden=!navigator.share})};
 $('dlBtn').onclick=function(){cardBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='drop-club-top10.png';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},2000)})};
-$('shareBtn').onclick=function(){cardBlob(function(b){var f=new File([b],'drop-club-top10.png',{type:'image/png'}),d={title:'My Drop Club Top 10',text:'My Drop Club list (DEMO / community-reported prices)',url:shareUrl()};
+$('shareBtn').onclick=function(){cardBlob(function(b){var f=new File([b],'drop-club-top10.png',{type:'image/png'}),d={title:'My Drop Club Top 10',text:WD_DEMO?'My Drop Club list (DEMO / community-reported prices)':'My Drop Club list (community-reported or self-entered prices)',url:shareUrl()};
  if(navigator.canShare&&navigator.canShare({files:[f]}))d.files=[f];navigator.share(d).catch(function(){})})};
 
 /* ================= Read-only shared view ================= */
 var shared=null;
 function route(){var m=location.hash.match(/#list=([\w-]+)/);shared=null;if(m){try{shared=dec(m[1]);if(!shared.length)shared=null}catch(e){}}
- $('roView').hidden=!shared;$('app').hidden=!!shared;$('tabsNav').hidden=!!shared;if(shared){$('roTitle').textContent='Top '+shared.length;$('roList').innerHTML=topHtml(shared)}}
+ $('roView').hidden=!shared;$('app').hidden=!!shared;$('tabsNav').hidden=!!shared;if(shared){$('roDemo').hidden=!shared.some(function(x){return x.s==='demo'});$('roTitle').textContent='Top '+shared.length;$('roList').innerHTML=topHtml(shared)}}
 $('exitRo').onclick=function(){history.replaceState(null,'',location.pathname+location.search);route()};
-$('importBtn').onclick=function(){if(!shared)return;var room=MAX-S.items.length,total=shared.length,add=shared.slice(0,room);add.forEach(function(x){var n=mk(x.n,x.u,x.o,x.p,A(x.s||'demo').enabled?x.s||'demo':'demo');n.cur=x.c;n.hist=[{date:nowIso(),price:x.o},{date:nowIso(),price:x.c}];S.items.push(n)});S.started=true;$('exitRo').onclick();refreshAll();msg($('msg'),add.length<total?'Imported '+add.length+' of '+total+' (10-item limit).':'Imported '+add.length+' item'+(add.length==1?'':'s')+' \u2713',add.length<total?'warn':'good')};
+$('importBtn').onclick=function(){if(!shared)return;var room=MAX-S.items.length,total=shared.length,add=shared.slice(0,room);add.forEach(function(x){var ok=A(x.s||DEF_SRC).enabled&&A(x.s).id===x.s,n=mk(x.n,x.u,x.o,x.p,ok?x.s:DEF_SRC);if(ok&&x.c!=null){n.cur=x.c;n.hist=[{date:x.t||nowIso(),price:x.c}];n.pt={s:srcLabel(x.s)+' (from shared list)',r:'',t:x.t||null}}else if(n.src!=='manual'){n.cur=null;n.hist=[]}S.items.push(n)});S.started=true;$('exitRo').onclick();refreshAll();msg($('msg'),add.length<total?'Imported '+add.length+' of '+total+' (10-item limit).':'Imported '+add.length+' item'+(add.length==1?'':'s')+' \u2713',add.length<total?'warn':'good')};
 addEventListener('hashchange',route);
 
 /* ================= Theme switcher ================= */
@@ -527,10 +550,10 @@ WD.affiliate={config:AFFILIATE,parseAmazon:parseAmazon,buyLink:buyLink,stripTrac
 
 /* ================= Boot ================= */
 if(!storageOk())storeWarn();
-load();if(S.auto){$('auto').checked=true;timer=setInterval(simulate,2000)}
+load();if(S.auto&&WD_DEMO){$('auto').checked=true;timer=setInterval(simulate,2000)}
 var first=!S.seeded&&!S.items.length;
 render();route();srcHint();
 if(first&&!shared){setTimeout(function(){$('what').focus()},50)}
-HukdAdapter.init().then(function(){render();return first?seed():refreshAll()}).then(function(){save();render();document.documentElement.dataset.ready='1'});
+HukdAdapter.init().then(function(){render();return first&&WD_DEMO?seed():refreshAll()}).then(function(){save();render();document.documentElement.dataset.ready='1'});
 })();
 </script></body></html>
