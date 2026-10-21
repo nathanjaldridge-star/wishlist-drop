@@ -41,7 +41,11 @@ html:not([data-theme]) .bar{height:6px}html:not([data-theme]) #simBtn{background
 .demo{background:var(--demo-bg);color:var(--demo-ink);text-align:center;font-weight:var(--fw-h);padding:8px;font-size:14px;position:sticky;top:0;z-index:5}
 header{padding:14px 16px 0;max-width:720px;margin:auto}.hrow{display:flex;justify-content:space-between;align-items:center;gap:8px}h1{margin:0;font-size:var(--h1);font-weight:var(--fw-x);letter-spacing:-.01em}h1 span{color:var(--accent-lg)}header p{margin:2px 0 0;color:var(--mut);font-size:14px}
 .theme{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mut)}.theme label{margin:0;font-weight:var(--fw-b);font-size:13px}.theme select{width:auto;min-height:44px;padding:6px 8px;font-size:14px;border-radius:var(--rs)}
-main{max-width:720px;margin:auto;padding:4px 16px 96px}
+main{max-width:720px;margin:auto;padding:4px 16px 8px}
+.foot-legal{max-width:720px;margin:auto;padding:4px 16px 96px;font-size:12.5px;color:var(--mut)}.foot-legal p{margin:6px 0}.devnote{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.buy{display:flex;align-items:center;gap:8px;margin-top:8px}.buybtn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border-radius:var(--rs);background:var(--cta);color:var(--cta-ink);font-weight:var(--fw-h);text-decoration:none;font-size:15px}
+.buybtn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}ol.top .buybtn{min-height:44px;padding:8px 14px;font-size:14px}
+.ad{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:2px 6px;border:1px solid currentColor;border-radius:4px;color:var(--ink);background:var(--card)}
 section{background:var(--card);border-radius:var(--r);padding:16px;margin:12px 0;box-shadow:var(--shadow);border:var(--sec-border)}
 h2{font-size:18px;font-weight:var(--fw-h);margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 label{display:block;font-weight:var(--fw-b);font-size:14px;margin:10px 0 4px}
@@ -153,6 +157,7 @@ if(t!=='default')window.WD_LOAD_FONTS();})();
  <div class="msg" id="shareMsg" role="status" aria-live="polite"></div></section></div>
 </div>
 </main>
+<footer class="foot-legal" id="legal"><p><b>Affiliate disclosure:</b> As an Amazon Associate we earn from qualifying purchases. Links marked <span class="ad">Ad</span> are affiliate links; we may earn a commission at no extra cost to you.</p><p id="devNote" class="devnote" hidden>Dev note: affiliate tag not set. Amazon links are untagged.</p></footer>
 <div id="dlg" class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgMsg" hidden><form id="dlgForm" class="dlgbox" novalidate><p id="dlgMsg"></p><div id="dlgInWrap"><label for="dlgIn" class="sr">Your answer</label><input type="text" id="dlgIn" inputmode="decimal" autocomplete="off"></div><div class="row"><button type="button" id="dlgCancel">Cancel</button><button type="submit" class="pri" id="dlgOk">OK</button></div></form></div>
 <div id="storeWarn" class="storewarn" role="alert" hidden>⚠️ Your browser isn’t saving data (private mode, blocked or full storage). Your list will be lost when you close this tab.</div>
 <nav class="tabs" id="tabsNav" aria-label="Sections"><div role="tablist" id="tabs" aria-label="Sections"><button role="tab" aria-selected="true" data-t="watch" id="t-watch" aria-controls="tab-watch" tabindex="0">📋<br>Watch</button><button role="tab" aria-selected="false" data-t="alerts" id="t-alerts" aria-controls="tab-alerts" tabindex="-1">🔔<br>Alerts <span id="badge"></span></button><button role="tab" aria-selected="false" data-t="share" id="t-share" aria-controls="tab-share" tabindex="-1">🏆<br>Top 10</button></div></nav>
@@ -171,6 +176,46 @@ var toP=function(n){return Math.round(+n*100)};
 function uid(){return Math.random().toString(36).slice(2,9)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return'&#'+c.charCodeAt(0)+';'})}
 function safeUrl(u){u=String(u||'');return /^https?:\/\//i.test(u)?u:''}
+
+/* ================= Affiliate links =================
+   >>> NATHAN: put your Amazon Associates UK tracking ID in AFFILIATE.amazonUK.tag (e.g. 'wishlistdrop-21'). <<<
+   Empty tag = links stay untagged and a dev note shows "affiliate tag not set".
+   Rules: only the "Buy on Amazon" button is ever tagged (never the item's own link, never automatically);
+   an existing tag= from someone else is kept and ours is NOT added; tracking params are stripped;
+   tagged links get rel="sponsored noopener" and a visible "Ad" label; the footer carries the Amazon disclosure. */
+var AFFILIATE={
+ amazonUK:{tag:''},                                   // <- Amazon Associates UK tag goes here
+ skimlinks:{id:'',enabled:false},                     // non-Amazon hooks: disabled until approved
+ sovrn:{key:'',enabled:false},
+ awin:{publisherId:'',enabled:false}
+};
+(function(o){if(o&&typeof o==='object'){for(var k in o)if(AFFILIATE[k]&&o[k])for(var j in o[k])AFFILIATE[k][j]=o[k][j]}})(window.WD_AFFILIATE); // test/dev override only
+var AMZ_HOST=/^(?:www\.|smile\.|m\.)?amazon\.co\.uk$/i,AMZ_SHORT=/^(?:www\.)?(?:amzn\.to|amzn\.eu)$/i,
+ ASIN_RE=/\/(?:dp|gp\/product|gp\/aw\/d|gp\/offer-listing|exec\/obidos\/ASIN|o\/ASIN)\/([A-Z0-9]{10})(?=[\/?#]|$)/i,
+ TRACKING=/^(utm_.*|ref|ref_|pf_rd_.*|pd_rd_.*|_encoding|psc|qid|sr|crid|sprefix|keywords|th|linkCode|linkId|camp|creative|creativeASIN|ascsubtag|smid|spLa|content-id|dib|dib_tag|gclid|fbclid|mc_.*|social_share|starsLeft|tracking_id)$/i;
+function parseAmazon(u){var url;try{url=new URL(/^https?:\/\//i.test(String(u))?u:'https://'+u)}catch(e){return{kind:'other'}}
+ var h=url.hostname.toLowerCase();if(AMZ_SHORT.test(h))return{kind:'amazon-short',url:url.href};
+ if(!AMZ_HOST.test(h))return{kind:'other',url:url.href};
+ var m=url.pathname.match(ASIN_RE),theirs=url.searchParams.get('tag')||'';
+ return{kind:'amazon',asin:m?m[1].toUpperCase():null,existingTag:theirs,url:url.href}}
+function stripTracking(href){try{var u=new URL(href),keep=[];u.searchParams.forEach(function(v,k){if(!TRACKING.test(k))keep.push([k,v])});u.search='';keep.forEach(function(kv){u.searchParams.append(kv[0],kv[1])});u.hash='';return u.toString()}catch(e){return href}}
+/* Pluggable non-Amazon hooks (Skimlinks / Sovrn / Awin deep links). All disabled: wrap() is never called while enabled=false. */
+var RETAILER_HOOKS=[
+ {id:'skimlinks',enabled:function(){return AFFILIATE.skimlinks.enabled&&!!AFFILIATE.skimlinks.id},wrap:function(u){return 'https://go.skimresources.com/?id='+encodeURIComponent(AFFILIATE.skimlinks.id)+'&url='+encodeURIComponent(u)}},
+ {id:'sovrn',enabled:function(){return AFFILIATE.sovrn.enabled&&!!AFFILIATE.sovrn.key},wrap:function(u){return 'https://redirect.viglink.com?key='+encodeURIComponent(AFFILIATE.sovrn.key)+'&u='+encodeURIComponent(u)}},
+ {id:'awin',enabled:function(){return AFFILIATE.awin.enabled&&!!AFFILIATE.awin.publisherId},wrap:function(u,adv){return adv?'https://www.awin1.com/cread.php?awinmid='+encodeURIComponent(adv)+'&awinaffid='+encodeURIComponent(AFFILIATE.awin.publisherId)+'&ued='+encodeURIComponent(u):null}}];
+/* buyLink(url) -> {show, href, ad, retailer, note}. Pure; used only to build the Buy button. */
+function buyLink(raw){var safe=safeUrl(raw)||(raw&&/^(www\.)?[\w-]+(\.[\w-]+)+\//i.test(raw)?'https://'+raw:'');if(!safe)return{show:false};var a=parseAmazon(safe),tag=String(AFFILIATE.amazonUK.tag||'').trim();
+ if(a.kind==='amazon-short')return{show:true,retailer:'Amazon',href:a.url,ad:false,note:'Short Amazon link (amzn.to/amzn.eu) cannot be resolved in the browser, so it is left untagged.'};
+ if(a.kind==='amazon'){if(!a.asin)return{show:true,retailer:'Amazon',href:stripTracking(a.url),ad:false,note:'No product ID (ASIN) found, so the link is left untagged.'};
+  var base='https://www.amazon.co.uk/dp/'+a.asin;
+  if(a.existingTag)return{show:true,retailer:'Amazon',asin:a.asin,href:base+'?tag='+encodeURIComponent(a.existingTag),ad:false,note:'Link already carries someone else\u2019s tag; kept, ours not added.'};
+  if(!tag)return{show:true,retailer:'Amazon',asin:a.asin,href:base,ad:false,note:'affiliate tag not set'};
+  return{show:true,retailer:'Amazon',asin:a.asin,href:base+'?tag='+encodeURIComponent(tag),ad:true,note:''}}
+ for(var i=0;i<RETAILER_HOOKS.length;i++){var hk=RETAILER_HOOKS[i];if(hk.enabled()){var w=hk.wrap(stripTracking(safe));if(w)return{show:true,retailer:hostOf(safe),href:w,ad:true,note:'',hook:hk.id}}}
+ return{show:false}}
+function buyHtml(raw,where){var b=buyLink(raw);if(!b.show)return'';
+ return'<div class="buy"><a class="buybtn" href="'+esc(b.href)+'" target="_blank" rel="'+(b.ad?'sponsored noopener':'noopener')+'" data-where="'+where+'"'+(b.note?' title="'+esc(b.note)+'"':'')+'>Buy on '+esc(b.retailer)+'</a>'+(b.ad?'<span class="ad" title="Affiliate link: we may earn a commission">Ad</span>':'')+'</div>'}
 function isUrl(s){s=s.trim();return /^(https?:\/\/|www\.)\S+$/i.test(s)||/^[\w-]+(\.[\w-]+)+\/\S*$/.test(s)}
 function nameFromUrl(s){try{var u=new URL(/^https?:/i.test(s)?s:'https://'+s);var segs=u.pathname.split('/').filter(Boolean).map(decodeURIComponent).filter(function(x){return /[a-z]{3}/i.test(x)&&!/^(dp|p|product|products|item|itm|gp|ref|deals)$/i.test(x)});
  var slug=segs.sort(function(a,b){return b.length-a.length})[0];
@@ -249,7 +294,7 @@ function applyRecord(it,r){it.rec=stripPriv(r);it.match=r._match||null;if(r.erro
  if(!it.hist.length)it.hist=[{date:it.added,price:it.orig}];checkHit(it)}
 function checkHit(it){var ok=it.rec&&it.rec.error_state==='ok';var at=ok&&it.cur!=null&&it.cur<=targetOf(it);
  if(at&&!it.hit){var src=it.rec.source==='hukd_rss'?'HotUKDeals (community reported)':(it.rec.label==='DEMO'?'DEMO (simulated)':'Manual');
-  S.alerts.unshift({id:uid(),t:nowIso(),src:src,text:it.name+' hit your '+it.pct+'% target: now '+gbp(it.cur)+' (was '+gbp(it.orig)+', target '+gbp(targetOf(it))+').'+(it.rec.promo_code?' Community-reported code: '+it.rec.promo_code+'.':'')});S.alerts=S.alerts.slice(0,100)}
+  S.alerts.unshift({id:uid(),t:nowIso(),url:it.url||'',src:src,text:it.name+' hit your '+it.pct+'% target: now '+gbp(it.cur)+' (was '+gbp(it.orig)+', target '+gbp(targetOf(it))+').'+(it.rec.promo_code?' Community-reported code: '+it.rec.promo_code+'.':'')});S.alerts=S.alerts.slice(0,100)}
  if(ok)it.hit=at}
 var COMPARE=['demo','hukd_rss','awin_feed','awin_promotions','keepa'];
 function offersFrom(a,it,opts){return a.getOffers?a.getOffers(it,opts):a.getPrice(it,opts).then(function(r){return[r]})}
@@ -263,7 +308,7 @@ function bestOffer(it){return it.offers&&it.offers[0]||null}
 function gapPct(it){var b=bestOffer(it);return b?(it.orig-b.current_price)/it.orig*100:0}
 function srcName(o){return o.source==='hukd_rss'?'HotUKDeals, community reported':o.label==='DEMO'?'DEMO, simulated':o.source}
 function checkDrop(it){var g=gapPct(it),b=bestOffer(it),on=g>=10;
- if(on&&!it.drop10){S.alerts.unshift({id:uid(),t:nowIso(),src:srcName(b),text:'\u2b07\ufe0f '+it.name+' is '+g.toFixed(0)+'% below its reference price: '+gbp(b.current_price)+' at '+b.retailer+' (reference '+gbp(it.orig)+').'})}
+ if(on&&!it.drop10){S.alerts.unshift({id:uid(),t:nowIso(),url:it.url||'',src:srcName(b),text:'\u2b07\ufe0f '+it.name+' is '+g.toFixed(0)+'% below its reference price: '+gbp(b.current_price)+' at '+b.retailer+' (reference '+gbp(it.orig)+').'})}
  it.drop10=on}
 function refreshAll(opts){return Promise.all(S.items.map(function(it){return refreshItem(it,opts)})).then(function(){save();render()})}
 function simulate(){return refreshAll({step:true})}
@@ -347,8 +392,8 @@ function render(){$('count').textContent=S.items.length+'/10';$('welcome').hidde
   '<div class="stats"><div>Original<b>'+gbp(it.orig)+'</b></div><div>Now<b>'+gbp(cur)+'</b></div><div>Change<b class="'+(ch<0?'down':ch>0?'up':'')+'">'+(ch>0?'+':'')+ch.toFixed(1)+'%</b></div><div>Target −'+it.pct+'%<b>'+gbp(t)+'</b></div></div>'+
   '<div class="bar'+(prog>=100?' done':'')+'" role="progressbar" aria-label="Progress to target" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(prog)+'"><i style="width:'+prog+'%"></i></div>'+
   errBox(it)+cmpBox(it)+dealBox(it)+
-  '<div class="foot">'+spark(it.hist||[],t)+'<div class="row" style="flex:0"><button data-a="edit" aria-label="Edit '+esc(it.name)+'">Edit</button><button class="danger" data-a="del" aria-label="Delete '+esc(it.name)+'">Delete</button></div></div>';c.appendChild(d)});
- $('feed').innerHTML=S.alerts.length?S.alerts.map(function(a){return'<div class="alert">🎯 '+esc(a.text)+'<time datetime="'+a.t+'">'+new Date(a.t).toLocaleString('en-GB')+' · '+esc(a.src||'DEMO')+'</time></div>'}).join(''):'<p class="empty">No alerts yet. Try \u201cSimulate a day\u201d.</p>';
+  buyHtml(it.url,'card')+'<div class="foot">'+spark(it.hist||[],t)+'<div class="row" style="flex:0"><button data-a="edit" aria-label="Edit '+esc(it.name)+'">Edit</button><button class="danger" data-a="del" aria-label="Delete '+esc(it.name)+'">Delete</button></div></div>';c.appendChild(d)});
+ $('feed').innerHTML=S.alerts.length?S.alerts.map(function(a){return'<div class="alert">🎯 '+esc(a.text)+'<time datetime="'+a.t+'">'+new Date(a.t).toLocaleString('en-GB')+' · '+esc(a.src||'DEMO')+'</time>'+buyHtml(a.url,'alert')+'</div>'}).join(''):'<p class="empty">No alerts yet. Try \u201cSimulate a day\u201d.</p>';
  $('badge').textContent=S.alerts.length?'('+S.alerts.length+')':'';
  $('topList').innerHTML=topHtml(shareList());
  $('seedBtn').hidden=S.items.some(function(i){return i.example});
@@ -358,7 +403,7 @@ function shareList(){return S.items.map(function(i){return{n:i.name,u:i.url,o:i.
 function rank(list){return list.slice().sort(function(a,b){return(a.c/(a.o*(1-a.p/100)))-(b.c/(b.o*(1-b.p/100)))})}
 function stOf(x){return status({orig:x.o,cur:x.c,pct:x.p,rec:{error_state:x.e||'ok'}})}
 function srcLabel(s){return s==='hukd_rss'?'community reported':s==='demo'?'DEMO':s==='manual'?'manual':'n/a'}
-function topHtml(list){if(!list.length)return'<li class="empty" style="display:block">No items yet.</li>';return rank(list).map(function(x){var st=stOf(x);return'<li><div class="g"><b>'+esc(x.n)+'</b><div class="small">Target '+gbp(Math.round(x.o*(1-x.p/100)))+' (−'+x.p+'%) · now '+gbp(x.c)+' · '+srcLabel(x.s)+'</div></div><span class="pill '+st[1]+'"'+(st[1]=='p-d'||st[1]=='p-t'?pillAttr({orig:x.o,cur:x.c}):'')+'>'+st[0]+'</span></li>'}).join('')}
+function topHtml(list){if(!list.length)return'<li class="empty" style="display:block">No items yet.</li>';return rank(list).map(function(x){var st=stOf(x);return'<li><div class="g"><b>'+esc(x.n)+'</b><div class="small">Target '+gbp(Math.round(x.o*(1-x.p/100)))+' (−'+x.p+'%) · now '+gbp(x.c)+' · '+srcLabel(x.s)+'</div>'+buyHtml(x.u,'top')+'</div><span class="pill '+st[1]+'"'+(st[1]=='p-d'||st[1]=='p-t'?pillAttr({orig:x.o,cur:x.c}):'')+'>'+st[0]+'</span></li>'}).join('')}
 $('cards').onclick=function(e){var b=e.target.closest('button');if(!b)return;var id=b.closest('.card').dataset.id,it=S.items.find(function(x){return x.id==id}),a=b.dataset.a;
  if(a=='del'){ask('Delete \u201c'+it.name+'\u201d?',{ok:'Delete',danger:true}).then(function(y){if(!y)return;S.items=S.items.filter(function(x){return x.id!=id});if(editing==id)resetForm();save();render()})}
  else if(a=='retry'){refreshItem(it).then(function(){save();render()})}
@@ -430,6 +475,9 @@ var hasThemeParam=false;try{hasThemeParam=new URLSearchParams(location.search).h
 $('themeBox').hidden=!(hasThemeParam||curTheme()!=='default');
 $('themeSel').value=curTheme();$('themeSel').onchange=function(){setTheme(this.value,true)};
 WD.setTheme=setTheme;WD.theme=curTheme;
+
+$('devNote').hidden=!!String(AFFILIATE.amazonUK.tag||'').trim();if(!$('devNote').hidden&&window.console)console.info('[Wishlist Drop] affiliate tag not set: Amazon links are untagged.');
+WD.affiliate={config:AFFILIATE,parseAmazon:parseAmazon,buyLink:buyLink,stripTracking:stripTracking,hooks:RETAILER_HOOKS};
 
 /* ================= Boot ================= */
 if(!storageOk())storeWarn();

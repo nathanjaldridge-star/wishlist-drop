@@ -9,6 +9,7 @@ async function page(o={}){const ctx=await b.newContext({viewport:o.vp||{width:39
  await p.exposeFunction('__xss',()=>{p.xss=true});
  if(!o.noHook)await p.exposeFunction('WD_DIALOG_HOOK',(m,t)=>{p.dialogs.push(m);if(/xss/i.test(m))p.xss=true;return t=='prompt'?(p.ans??''):true});
  p.on('dialog',d=>{p.dialogs.push(d.message());if(/xss/i.test(d.message()))p.xss=true;d.accept(d.type()=='prompt'?(p.ans??''):undefined)});
+ if(o.aff)await ctx.addInitScript(a=>{window.WD_AFFILIATE=a},o.aff);
  await p.goto(URL0+(o.q||'')+(o.hash||''));if(o.wait!==false)await p.waitForSelector('html[data-ready="1"]',{timeout:15000}).catch(()=>{});return p}
 const S=p=>p.evaluate(()=>WD.state());
 async function add(p,what,price,o={}){await p.fill('#what',what);if(o.name!=null){await p.fill('#name',o.name)}await p.fill('#price',price==null?'':String(price));
@@ -105,7 +106,7 @@ await T('TH2','Theme picker hidden on plain default URL; shown with ?theme=; swi
 await T('TH3','Share card follows the theme (canvas colours differ per theme)',async()=>{const px={};for(const t of THEMES){const q=await page({q:'?theme='+t});await q.evaluate(()=>document.fonts&&document.fonts.ready);px[t]=await q.evaluate(()=>{const c=WD.drawCard();const d=c.getContext('2d').getImageData(30,60,1,1).data;return d[0]+','+d[1]+','+d[2]});await q.context().close()}
  ok(new Set(Object.values(px)).size>=3,JSON.stringify(px));ok(px.drop==='255,102,0',JSON.stringify(px));return JSON.stringify(px)});
 await T('TH4','axe-core colour contrast + WCAG AA per theme (watch w/ all statuses + error panel, alerts, top 10 + card, read-only, dialog)',async()=>{const axe=fs.readFileSync('/tmp/wdt/node_modules/axe-core/axe.min.js','utf8');const rep=[];let bad=[];
- for(const t of THEMES){const q=await page({q:'?theme='+t,noHook:true});await q.evaluate(()=>document.fonts&&document.fonts.ready);await add(q,'Contrast kettle',10);
+ for(const t of THEMES){const q=await page({q:'?theme='+t,noHook:true,aff:{amazonUK:{tag:'contrast-21'}}});await q.evaluate(()=>document.fonts&&document.fonts.ready);await add(q,'https://www.amazon.co.uk/dp/B0BX2L8PBT',10,{name:'Contrast kettle'});ok(await q.isVisible('#cards .buy .ad'),'no Ad label in '+t);
   for(let i=0;i<25;i++)await q.click('#simBtn');await q.evaluate(()=>document.querySelector('details').open=true);await q.click('button[data-err=changed]');await q.waitForTimeout(80);
   const run=async(where)=>{await q.addScriptTag({content:axe});const r=await q.evaluate(()=>axe.run(document,{runOnly:['wcag2a','wcag2aa','wcag21aa']}));const cc=r.violations.filter(v=>v.id==='color-contrast');const n=cc.reduce((a,v)=>a+v.nodes.length,0);
    const chk=(r.passes.find(v=>v.id==='color-contrast')||{nodes:[]}).nodes.length;rep.push(t+' '+where+': contrast pass nodes '+chk+', fail '+n+(r.violations.length?' | violations: '+r.violations.map(v=>v.id+'('+v.impact+')×'+v.nodes.length).join(','):''));
@@ -115,6 +116,48 @@ await T('TH4','axe-core colour contrast + WCAG AA per theme (watch w/ all status
   const su=await q.evaluate(()=>WD.shareUrl());await q.goto(su);await q.waitForSelector('#roView:not([hidden])');await run('read-only');
   ok(!q.errs.length,q.errs.join('|'));await q.context().close()}
  fs.writeFileSync(Q+'themes-contrast.txt',rep.join('\n')+'\n');ok(!bad.length,bad.join(' || '));return 'see qa/themes-contrast.txt'});
+await T('AF1','ASIN extraction + canonicalisation (dp, gp/product, gp/aw/d, slugs, query, mobile, smile, existing tag, short, non-Amazon)',async()=>{const r=await p.evaluate(()=>{const P=WD.affiliate.parseAmazon;const C=[
+ ['https://www.amazon.co.uk/dp/B0BX2L8PBT','amazon','B0BX2L8PBT',''],
+ ['https://www.amazon.co.uk/Apple-AirPods-Pro-2nd-generation/dp/B0CHWV2MYX/ref=sr_1_1?crid=X&keywords=airpods&qid=1&sr=8-1','amazon','B0CHWV2MYX',''],
+ ['https://www.amazon.co.uk/gp/product/B08N5WRWNW?pf_rd_r=ABC&utm_source=x','amazon','B08N5WRWNW',''],
+ ['https://www.amazon.co.uk/gp/aw/d/B09B8V1LZ3/','amazon','B09B8V1LZ3',''],
+ ['amazon.co.uk/Some-Slug/dp/b07pxgqhhq','amazon','B07PXGQHHQ',''],
+ ['https://m.amazon.co.uk/dp/B0BX2L8PBT?th=1&psc=1','amazon','B0BX2L8PBT',''],
+ ['https://smile.amazon.co.uk/dp/B0BX2L8PBT','amazon','B0BX2L8PBT',''],
+ ['https://www.amazon.co.uk/dp/B0BX2L8PBT?tag=someoneelse-21&ref=x','amazon','B0BX2L8PBT','someoneelse-21'],
+ ['https://www.amazon.co.uk/exec/obidos/ASIN/B0BX2L8PBT','amazon','B0BX2L8PBT',''],
+ ['https://www.amazon.co.uk/s?k=headphones','amazon',null,''],
+ ['https://amzn.to/3xYzAbC','amazon-short',undefined,undefined],
+ ['https://amzn.eu/d/abc123','amazon-short',undefined,undefined],
+ ['https://www.amazon.com/dp/B0BX2L8PBT','other',undefined,undefined],
+ ['https://www.amazon.co.uk.evil.com/dp/B0BX2L8PBT','other',undefined,undefined],
+ ['https://www.currys.co.uk/products/sony-123.html','other',undefined,undefined]];
+ return C.map(([u,k,asin,tag])=>{const x=P(u);return{u,ok:x.kind===k&&x.asin===asin&&x.existingTag===tag,got:JSON.stringify(x)}})});const bad=r.filter(x=>!x.ok);ok(!bad.length,bad.map(x=>x.u+' → '+x.got).join(' | '));return r.length+' URLs'});
+await T('AF2','Tag set: Buy button → canonical /dp/ASIN?tag=, tracking stripped, rel=sponsored noopener, visible Ad label; item link untouched; existing tag kept (no Ad)',async()=>{const q=await page({aff:{amazonUK:{tag:'nathantest-21'}}});await clear(q);
+ await add(q,'https://www.amazon.co.uk/Sony-WH-1000XM5/dp/B09XS7JWHH/ref=sr_1_3?crid=1&keywords=sony&qid=99&utm_source=x',300,{name:'Sony XM5'});
+ await add(q,'https://www.amazon.co.uk/dp/B0BX2L8PBT?tag=someoneelse-21&ref=abc',50,{name:'Theirs'});
+ await add(q,'https://www.currys.co.uk/products/kettle-123.html',30,{name:'Currys kettle'});await q.waitForTimeout(150);
+ const c=await q.evaluate(()=>[...document.querySelectorAll('#cards .card')].map(cd=>{const b=cd.querySelector('.buybtn');const a=cd.querySelector('.ct a');return{name:cd.querySelector('h3').textContent,href:b&&b.getAttribute('href'),rel:b&&b.rel,ad:!!cd.querySelector('.buy .ad'),adVisible:!!(cd.querySelector('.buy .ad')&&cd.querySelector('.buy .ad').offsetHeight>0),own:a&&a.getAttribute('href')}}));
+ const s0=c.find(x=>x.name=='Sony XM5'),s1=c.find(x=>x.name=='Theirs'),s2=c.find(x=>x.name=='Currys kettle');
+ ok(s0.href==='https://www.amazon.co.uk/dp/B09XS7JWHH?tag=nathantest-21',s0.href);ok(s0.rel==='sponsored noopener',s0.rel);ok(s0.ad&&s0.adVisible,'Ad label missing');ok(!/tag=/.test(s0.own)&&/utm_source/.test(s0.own),'item link was modified: '+s0.own);
+ ok(s1.href==='https://www.amazon.co.uk/dp/B0BX2L8PBT?tag=someoneelse-21',s1.href);ok(!s1.ad&&s1.rel==='noopener','their tag got Ad/sponsored');
+ ok(s2.href===null,'non-Amazon got a buy button while hooks disabled');ok(await q.evaluate(()=>WD.affiliate.hooks.every(h=>!h.enabled())));
+ ok(!(await q.isVisible('#devNote')),'dev note visible with tag set');ok(/As an Amazon Associate we earn from qualifying purchases/.test(await q.textContent('#legal')));
+ const before=await q.evaluate(()=>location.href);ok(!/amazon/.test(before));ok(!q.errs.length,q.errs.join('|'));
+ // alerts + shared view carry the buy button
+ await q.evaluate(()=>{const it=WD.state().items.find(i=>i.name=='Sony XM5');it.src='manual';it.cur=20000});await q.evaluate(()=>WD.refreshAll());await q.click('[data-t=alerts]');
+ const al=await q.evaluate(()=>{const b=document.querySelector('#feed .buybtn');return b&&{href:b.getAttribute('href'),ad:!!b.parentNode.querySelector('.ad')}});ok(al&&al.href.endsWith('?tag=nathantest-21')&&al.ad,'alert buy: '+JSON.stringify(al));
+ const su=await q.evaluate(()=>WD.shareUrl());await q.goto(su);await q.waitForSelector('#roView:not([hidden])');
+ const ro=await q.evaluate(()=>[...document.querySelectorAll('#roList .buybtn')].map(b=>[b.getAttribute('href'),!!b.parentNode.querySelector('.ad'),b.rel]));ok(ro.length==2,'shared view buttons '+JSON.stringify(ro));ok(ro.some(x=>x[0].endsWith('?tag=nathantest-21')&&x[1]&&x[2]=='sponsored noopener'));ok(ro.some(x=>x[0].endsWith('?tag=someoneelse-21')&&!x[1]));
+ await q.context().close()});
+await T('AF3','Tag empty (default): untagged canonical link, no Ad label, dev note "affiliate tag not set", disclosure shown; short links untagged with note',async()=>{const q=await page();await clear(q);
+ await add(q,'https://www.amazon.co.uk/gp/product/B08N5WRWNW?utm_medium=email',99,{name:'Echo'});await add(q,'https://amzn.to/3xYzAbC',20,{name:'Short'});await q.waitForTimeout(100);
+ const c=await q.evaluate(()=>[...document.querySelectorAll('#cards .card')].map(cd=>{const b=cd.querySelector('.buybtn');return{n:cd.querySelector('h3').textContent,href:b&&b.getAttribute('href'),title:b&&b.title,rel:b&&b.rel,ad:!!cd.querySelector('.buy .ad')}}));
+ const e=c.find(x=>x.n=='Echo'),sh=c.find(x=>x.n=='Short');ok(e.href==='https://www.amazon.co.uk/dp/B08N5WRWNW'&&!e.ad&&e.rel=='noopener'&&e.title=='affiliate tag not set',JSON.stringify(e));
+ ok(sh.href==='https://amzn.to/3xYzAbC'&&!sh.ad&&/cannot be resolved/.test(sh.title),JSON.stringify(sh));
+ ok(await q.isVisible('#devNote'));ok(/affiliate tag not set/.test(await q.textContent('#devNote')));ok(await q.isVisible('#legal'));ok(!q.errs.length,q.errs.join('|'));await q.context().close()});
+await T('AF4','Hooks stay disabled unless explicitly enabled; enabling one wraps non-Amazon links (with Ad), Amazon logic unaffected',async()=>{const q=await page({aff:{skimlinks:{id:'123X456',enabled:true}}});const r=await q.evaluate(()=>[WD.affiliate.buyLink('https://www.currys.co.uk/p/kettle?utm_source=a&colour=red'),WD.affiliate.buyLink('https://www.amazon.co.uk/dp/B0BX2L8PBT')]);
+ ok(r[0].show&&r[0].ad&&r[0].hook=='skimlinks'&&r[0].href.includes(encodeURIComponent('https://www.currys.co.uk/p/kettle?colour=red')),JSON.stringify(r[0]));ok(r[1].href=='https://www.amazon.co.uk/dp/B0BX2L8PBT'&&!r[1].ad,JSON.stringify(r[1]));await q.context().close()});
 await T('E1','No JS errors in main session',async()=>{ok(!p.errs.length,p.errs.join(' | '))});
 await b.close();fs.writeFileSync(Q+'results.json',JSON.stringify(res,null,1));
 for(const r of res)console.log((r.ok?'PASS':'FAIL')+' '+r.id+' '+r.name+(r.note?' — '+r.note:''));console.log(res.filter(r=>r.ok).length+'/'+res.length+' passed')})();

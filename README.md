@@ -19,6 +19,14 @@ Add `?theme=` to the URL. The **Theme** picker appears in the header only when `
 
 The DEMO banner and labels show in every theme. All four themes pass an axe-core WCAG AA scan with no colour-contrast failures (`qa/themes-contrast.txt`). White text never sits on #FF6600 (2.9:1). Black is used instead, and small orange text is #B34700. The share card PNG follows the theme. Fonts load from Google Fonts (free) without blocking the page, with system fonts offline.
 
+## Affiliate links & disclosure
+**As an Amazon Associate we earn from qualifying purchases.** Links marked **Ad** are affiliate links, and we may earn a commission at no extra cost to you.
+
+- **Where the tag goes:** `build/src.html`, in the `var AFFILIATE = {...}` block under "Affiliate links". Set `amazonUK: { tag: 'yourtag-21' }`, then run `node build/build.js` to regenerate `index.html`. While the tag is empty, links stay untagged and the footer shows "Dev note: affiliate tag not set".
+- **Only the Buy button is tagged:** the "Buy on Amazon" button (item cards, alerts, Top 10, shared view) is the only thing tagged. It points to `https://www.amazon.co.uk/dp/ASIN?tag=…`, with tracking parameters stripped, `rel="sponsored noopener"` and a visible "Ad" label.
+- **Never tagged:** the item's own link, anything opened automatically, links that already carry someone else's `tag=` (theirs is kept and ours isn't added), and amzn.to / amzn.eu short links (they can't be resolved in the browser).
+- **Other retailers:** Skimlinks, Sovrn and Awin deep-link hooks are in `RETAILER_HOOKS`. They're disabled (`enabled:false`) until those programmes approve the site.
+
 ## ⚠️ Data labels: please read
 - **DEMO prices are simulated, not real.** Items on the DEMO source (including "DEMO Amazon UK" and "DEMO Argos") follow a random walk. The banner and tags say so everywhere.
 - **HotUKDeals data is community reported.** Prices and codes come from user posts on the public HotUKDeals RSS feed and are unverified. Codes are only taken from a post's description text, never generated.

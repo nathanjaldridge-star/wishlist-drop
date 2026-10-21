@@ -123,3 +123,16 @@ The default theme was reworked to match clean's restraint, with purple #5b3df5 a
 - **Theme picker:** hidden on the plain default URL. It shows only when `?theme=` is present or a non-default theme is stored.
 
 TH2 was updated to cover this. Tests: qa.js 62/62, build/test.js 23/23. axe contrast: 0 failures in all 4 themes (`qa/themes-contrast.txt`). Screenshots: `themes/purple-clean-{watch,alerts,top10,sharecard}.png`.
+
+## Affiliate links (2026-10-21)
+The config is in `build/src.html` → `var AFFILIATE = { amazonUK: { tag: '' }, ... }`. Only the "Buy on Amazon" button is ever tagged: on item cards, alerts, the Top 10 and the shared read-only view. The item's own link is never changed.
+- **Canonicalisation:** links become `https://www.amazon.co.uk/dp/ASIN`. The ASIN is recognised in dp/, gp/product/, gp/aw/d/, gp/offer-listing/, exec/obidos/ASIN/ and o/ASIN/, on the www., m. and smile. hosts.
+- **Tracking params:** stripped.
+- **Existing tags:** an existing `tag=` is kept and ours is not added. That button gets no "Ad" label and no `sponsored`.
+- **Short links:** amzn.to / amzn.eu are left untagged, with a note.
+- **Tagged links:** get `rel="sponsored noopener"` and a visible "Ad" label.
+- **Footer disclosure:** "As an Amazon Associate we earn from qualifying purchases."
+- **Empty tag:** links are untagged, and the footer shows a dev note "affiliate tag not set".
+- **Non-Amazon hooks:** Skimlinks, Sovrn and Awin are in `RETAILER_HOOKS`, all disabled.
+
+Tests: AF1 (15 URL cases), AF2 (tag set: cards/alerts/shared view, existing tag kept, item link untouched, non-Amazon gets no button), AF3 (empty tag + short link), AF4 (hooks only when enabled). TH4 now includes a tagged Buy button and Ad label in every theme, with 0 contrast failures.

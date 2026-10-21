@@ -366,6 +366,30 @@
   "note": "see qa/themes-contrast.txt"
  },
  {
+  "id": "AF1",
+  "name": "ASIN extraction + canonicalisation (dp, gp/product, gp/aw/d, slugs, query, mobile, smile, existing tag, short, non-Amazon)",
+  "ok": true,
+  "note": "15 URLs"
+ },
+ {
+  "id": "AF2",
+  "name": "Tag set: Buy button → canonical /dp/ASIN?tag=, tracking stripped, rel=sponsored noopener, visible Ad label; item link untouched; existing tag kept (no Ad)",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "AF3",
+  "name": "Tag empty (default): untagged canonical link, no Ad label, dev note \"affiliate tag not set\", disclosure shown; short links untagged with note",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "AF4",
+  "name": "Hooks stay disabled unless explicitly enabled; enabling one wraps non-Amazon links (with Ad), Amazon logic unaffected",
+  "ok": true,
+  "note": ""
+ },
+ {
   "id": "E1",
   "name": "No JS errors in main session",
   "ok": true,
