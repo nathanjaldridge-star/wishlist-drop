@@ -122,7 +122,7 @@ The default theme was reworked to match clean's restraint, with purple #5b3df5 a
 - The text wordmark "Wishlist **Drop**" is in the header and on the share card.
 - **Theme picker:** hidden on the plain default URL. It shows only when `?theme=` is present or a non-default theme is stored.
 
-TH2 was updated to cover this. Tests: qa.js 62/62, build/test.js 23/23. axe contrast: 0 failures in all 4 themes (`qa/themes-contrast.txt`). Screenshots: `themes/purple-clean-{watch,alerts,top10,sharecard}.png`.
+TH2 was updated to cover this. Tests: qa.js 62/62, build/test.js 23/23. axe contrast: 0 failures in all 4 themes (`qa/themes-contrast.txt`). Screenshots: `themes/purple-clean-{watch,alerts,top10,sharecard}.png` (since removed; superseded by `themes/dropclub-*.png`).
 
 ## Affiliate links (2026-10-21)
 The config is in `build/src.html` → `var AFFILIATE = { amazonUK: { tag: '' }, ... }`. Only the "Buy on Amazon" button is ever tagged: on item cards, alerts, the Top 10 and the shared read-only view. The item's own link is never changed.
@@ -145,3 +145,7 @@ Tests: AF1 (15 URL cases), AF2 (tag set: cards/alerts/shared view, existing tag 
 - **Old looks:** only via `?theme=purple|drop|clean|hybrid`.
 - **Storage:** localStorage key `wishlistDrop.v2` is unchanged, so existing data is kept. The theme preference key changed to `dropClub.theme` so every returning visitor sees the new default.
 - **New tests:** DC1 (brand, meta/OG, copy) and DC2 (palette audit of all screens, the share card pixels and the sparkline). TH1–TH4 were updated for 5 themes. Results: qa.js 68/68, build/test.js 23/23, axe contrast 0 failures on 25 screens (5 themes × 5).
+
+
+## Top 10 compact rows + screenshot cleanup (2026-10-17)
+Top 10 rows at 390px: the name is on one line (ellipsis, full name in `title`), then the status pill and price inline, then one short meta line (RRP · target · source), then the Buy button. Seed rows went from 166/124/147px to 118/100/100px tall (measured at 390px). Stale old-branded `screenshots/` and legacy `themes/*-{watch,alerts,top10,sharecard}.png` were removed. `affiliate-buy.png` and `dropclub-*.png` were regenerated. Tests: qa.js 68/68, build/test.js 23/23, axe contrast: fail 0 on all 25 screens.

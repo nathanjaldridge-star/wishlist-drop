@@ -17,7 +17,9 @@ Add `?theme=` to the URL. The **Theme** picker appears in the header only when `
 | clean | Off-white, near-black text, single green accent #0A7F4F, thin borders, Inter 500/700 | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=clean |
 | hybrid | Clean layout, orange only for CTAs, drop badges and "at target" | https://nathanjaldridge-star.github.io/wishlist-drop/?theme=hybrid |
 
-<img src="themes/purple-clean-watch.png" width="200"> <img src="themes/drop-watch.png" width="200"> <img src="themes/clean-watch.png" width="200"> <img src="themes/hybrid-top10.png" width="200"> <img src="themes/drop-sharecard.png" width="200">
+<img src="themes/dropclub-top10.png" width="200"> <img src="themes/dropclub-alerts.png" width="200"> <img src="themes/affiliate-buy.png" width="200">
+
+Screenshots show the Drop Club default only. The legacy themes are still live via `?theme=`, but their old-branded screenshots have been removed.
 
 The DEMO banner and labels show in every theme. All five themes pass an axe-core WCAG AA scan with no colour-contrast failures (`qa/themes-contrast.txt`). White text never sits on #FF6600 (2.9:1). Black is used instead, and small orange text is #B34700. The share card PNG follows the theme. Fonts load from Google Fonts (free) without blocking the page, with system fonts offline.
 
@@ -56,7 +58,7 @@ Every source is an adapter: `getPrice(item) → Promise<record>`, plus an option
 ## Repo layout
 - `index.html`: the whole app (self-contained, also works offline from `file://`), built from `build/src.html` with `build/hukd_sample.xml` injected at `%%HUKD%%`.
 - `build/test.js`: headless test (playwright-core + system Chrome, ajv schema validation). Run `npm i playwright-core ajv ajv-formats && node build/test.js` (it uses absolute paths from the dev box; adjust `D`).
-- `data/hukd.json`: the RSS mirror. `docs/`: the price contract. `screenshots/`.
+- `data/hukd.json`: the RSS mirror. `docs/`: the price contract. `themes/`: current Drop Club screenshots.
 
 ## Limitations
 - In-browser alerts only, and only while the page is open. There's no email or push yet (see roadmap).
