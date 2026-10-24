@@ -1,7 +1,7 @@
 {
   "name": "drop-club",
   "private": true,
-  "description": "Drop Club (wishlist price-drop alerts). Static site on GitHub Pages; these deps are for build/tests only.",
+  "description": "Drop Club (wishlist price-drop alerts). Static site on GitHub Pages. devDependencies are for build/tests; pg is used only by the scheduled database jobs (scripts/db).",
   "scripts": {
     "build": "node build/build.js",
     "test:unit": "node build/test.js",
@@ -9,13 +9,22 @@
     "test:mirror": "node scripts/test-fetch-hukd.mjs",
     "test:ebay": "node scripts/test-fetch-ebay.mjs",
     "qa": "node qa/qa.js",
-    "test": "npm run build && npm run test:mirror && npm run test:ebay && npm run test:unit && npm run test:ebay-app && npm run qa",
-    "browser": "playwright-core install chromium"
+    "test": "npm run build && npm run test:mirror && npm run test:ebay && npm run test:db && npm run test:unit && npm run test:db-pipeline && npm run test:ebay-app && npm run qa",
+    "browser": "playwright-core install chromium",
+    "test:db": "node scripts/test-db.mjs",
+    "test:db-pipeline": "node scripts/test-db-pipeline.mjs",
+    "db:migrate": "node scripts/db/migrate.mjs",
+    "db:ingest": "node scripts/db/ingest.mjs",
+    "db:export": "node scripts/db/export.mjs"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "axe-core": "^4.10.0",
     "playwright-core": "^1.48.0"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

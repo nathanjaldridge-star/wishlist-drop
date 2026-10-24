@@ -63,6 +63,7 @@ To use an installed Chrome instead of the downloaded one, set `CHROME_PATH=/path
 | `build/build.js`, `build/hukd_sample.xml` | Build step and the embedded HUKD snapshot |
 | `scripts/fetch-hukd.mjs`, `scripts/hukd-config.json` | HotUKDeals RSS mirror (run by the workflow) |
 | `scripts/fetch-ebay.mjs`, `data/watchlist.json` | eBay Browse API live prices for the watch list (#11). Setup: `docs/ebay-setup.md` |
+| `db/migrations/`, `db/seed/example.sql`, `scripts/db/*.mjs` | Postgres price store (catalogue ids, listings, price history, per-source licence rules), filled by the eBay workflow once a `DATABASE_URL` secret exists; publishes data-branch `prices.json`, which the app reads (`Prices` in `build/src.html`). Catalogue ids for watched items live in `data/watchlist.json`. Docs: `docs/db.md`. Tests: `npm run test:db`, `npm run test:db-pipeline` |
 | `.github/workflows/ebay-prices.yml` | Every-30-minute eBay fetch → `data` branch (`ebay.json`, `price-log.jsonl`). Skips cleanly until the `EBAY_CLIENT_ID`/`EBAY_CLIENT_SECRET` secrets exist |
 | `.github/workflows/hukd-mirror.yml` | Every-5-minute mirror → `data` branch (`hukd.json`, `price-log.jsonl`) |
 | `docs/price-contract*.{md,json}` | Price record format every adapter must return |

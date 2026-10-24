@@ -1,7 +1,8 @@
 # eBay live prices (issue #11). Free on public repos. Calls ONLY eBay's official Browse API (EBAY_GB), never web pages.
 # Switches itself on when the two repo secrets EBAY_CLIENT_ID and EBAY_CLIENT_SECRET exist (Settings > Secrets and variables >
 # Actions). Until then every run logs "eBay keys not set yet – skipping" and succeeds without touching anything.
-# Setup steps: docs/ebay-setup.md. Output: data branch ebay.json (latest snapshot) + appended lines in price-log.jsonl.
+# Setup steps: docs/ebay-setup.md. Output: data branch ebay.json (latest snapshot) + appended lines in price-log.jsonl,
+# and prices.json from the Drop Club database when the DATABASE_URL secret is set (docs/db.md).
 # Budget: 1 token + 1 search per watch-list item per run; 10 items every 30 min = ~530 calls/day of the free 5,000.
 name: eBay live prices
 on:
@@ -39,6 +40,23 @@ jobs:
         if: steps.keys.outputs.have == 'yes'
         env: { EBAY_OUT: mirror/ebay.json, EBAY_LOG: mirror/price-log.jsonl, EBAY_WATCHLIST: data/watchlist.json }
         run: node scripts/fetch-ebay.mjs
+      # Drop Club database (docs/db.md). Off until a DATABASE_URL secret exists. The secret is given ONLY to the step that
+      # needs it; dependencies install first with lifecycle scripts disabled, so no package code runs with it in its env.
+      - name: Check for a database
+        id: db
+        if: steps.keys.outputs.have == 'yes'
+        env: { DATABASE_URL: '${{ secrets.DATABASE_URL }}' }
+        run: if [ -n "$DATABASE_URL" ]; then echo "have=yes" >> "$GITHUB_OUTPUT"; else echo "No DATABASE_URL secret – database step skipped"; fi
+      - name: Install database driver
+        if: steps.db.outputs.have == 'yes'
+        run: npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+      - name: Load prices into the database and export prices.json
+        if: steps.db.outputs.have == 'yes'
+        env: { DATABASE_URL: '${{ secrets.DATABASE_URL }}', DATABASE_CA: '${{ vars.DATABASE_CA }}' }
+        run: |
+          node scripts/db/migrate.mjs
+          node scripts/db/ingest.mjs mirror/price-log.jsonl data/watchlist.json
+          node scripts/db/export.mjs mirror/prices.json
       - name: Commit to the data branch if changed
         if: steps.keys.outputs.have == 'yes'
         working-directory: mirror
@@ -48,6 +66,7 @@ jobs:
           # Both mirror jobs append to price-log.jsonl: union-merge keeps both sides' lines instead of conflicting.
           echo 'price-log.jsonl merge=union' >> .git/info/attributes
           git add ebay.json price-log.jsonl
+          if [ -f prices.json ]; then git add prices.json; fi
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -m "data: eBay prices $(date -u +%FT%TZ)"
           for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep $((i*5)); done; exit 1
