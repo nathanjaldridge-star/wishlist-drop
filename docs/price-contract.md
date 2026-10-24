@@ -100,6 +100,7 @@ Fetched server-side only by `scripts/fetch-ebay.mjs` (GitHub Actions, every 30 m
 | in_stock | true for an ok record (an active Buy It Now listing) |
 | confidence | 0.5 + 0.1 per matching listing, capped at 0.9 |
 | watch_id | the `data/watchlist.json` item the record answers (optional field, eBay only) |
+| sku | Drop Club catalogue id (`DC` + 9 characters + check character). Minted from a GTIN, or from the watch-list id when there is no barcode. A title never mints one. Optional; present on eBay records. Shop SKUs are not this field |
 | market_stats | `{lowest, median, mean, count, trimmed, basis}` over the matching listings after a Tukey 1.5×IQR trim. **median = "typical price on eBay"**, not an RRP (optional field, eBay only) |
 
 error_state: `not_found` = no new Buy It Now GBP listing matched; `blocked` = HTTP 429 (we stop the run), 401/403, or a failed request with no previous record; `changed` = the response lost its `itemSummaries` list.

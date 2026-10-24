@@ -14,7 +14,8 @@
 // Env (tests): HUKD_BASE, HUKD_OUT, HUKD_LOG, HUKD_CONFIG, HUKD_NOW (ISO), HUKD_FORCE=1, HUKD_TIMEOUT_MS, HUKD_MIN_ITEMS, HUKD_RETRY_MS.
 import { writeFileSync, readFileSync, existsSync, renameSync, mkdirSync, appendFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { persistRows, rowFromHukd } from './price-store.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const CFG = JSON.parse(readFileSync(process.env.HUKD_CONFIG || join(here, 'hukd-config.json'), 'utf8'));
@@ -143,8 +144,10 @@ export async function run() {
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT + '.tmp', JSON.stringify(out) + '\n'); renameSync(OUT + '.tmp', OUT);
   if (logLines.length) { mkdirSync(dirname(LOG), { recursive: true }); appendFileSync(LOG, logLines.map((l) => JSON.stringify(l)).join('\n') + '\n'); }
+  const dbRows = logLines.map(rowFromHukd).filter(Boolean);
+  if (dbRows.length) { try { const saved = await persistRows(dbRows); if (!saved.skipped) console.log(`mysql: ${saved.observations} observations, ${saved.products} catalogue ids`); } catch (e) { warn('mysql: ' + (e && e.message ? e.message : e)); } }
   console.log(summary.join(' | ')); console.log(`deals ${deals.length}, logged ${logLines.length}${bf ? ' (Black Friday week cadence)' : ''}`);
   return { out, logLines };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) run().catch((e) => { console.error(e); process.exit(1); });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) run().catch((e) => { console.error(e); process.exit(1); });

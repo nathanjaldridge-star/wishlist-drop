@@ -63,6 +63,7 @@ To use an installed Chrome instead of the downloaded one, set `CHROME_PATH=/path
 | `build/build.js`, `build/hukd_sample.xml` | Build step and the embedded HUKD snapshot |
 | `scripts/fetch-hukd.mjs`, `scripts/hukd-config.json` | HotUKDeals RSS mirror (run by the workflow) |
 | `scripts/fetch-ebay.mjs`, `data/watchlist.json` | eBay Browse API live prices for the watch list (#11). Setup: `docs/ebay-setup.md` |
+| `scripts/sku.mjs`, `scripts/price-store.mjs`, `db/schema.sql` | Catalogue id (GTIN, or an issued id for a watch-list item) and the MySQL price store. Writes only when `MYSQL_URL` is set. `node scripts/price-store.mjs --init` applies the schema |
 | `.github/workflows/ebay-prices.yml` | Every-30-minute eBay fetch → `data` branch (`ebay.json`, `price-log.jsonl`). Skips cleanly until the `EBAY_CLIENT_ID`/`EBAY_CLIENT_SECRET` secrets exist |
 | `.github/workflows/hukd-mirror.yml` | Every-5-minute mirror → `data` branch (`hukd.json`, `price-log.jsonl`) |
 | `docs/price-contract*.{md,json}` | Price record format every adapter must return |

@@ -17,6 +17,7 @@ jobs:
     env:
       EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
       EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+      MYSQL_URL: ${{ secrets.MYSQL_URL }}
     steps:
       - name: Check for eBay keys
         id: keys
@@ -35,6 +36,9 @@ jobs:
       - name: Self-test the fetcher (offline mock, no real calls)
         if: steps.keys.outputs.have == 'yes'
         run: env -u EBAY_CLIENT_ID -u EBAY_CLIENT_SECRET node scripts/test-fetch-ebay.mjs
+      - name: Install the MySQL client when a database is configured
+        if: steps.keys.outputs.have == 'yes' && env.MYSQL_URL != ''
+        run: npm install --omit=dev
       - name: Fetch eBay prices for the watch list
         if: steps.keys.outputs.have == 'yes'
         env: { EBAY_OUT: mirror/ebay.json, EBAY_LOG: mirror/price-log.jsonl, EBAY_WATCHLIST: data/watchlist.json }
