@@ -45,15 +45,18 @@ ok('ebay.json missing (404) or with no ok records → stays "awaiting approval"'
 p=await open({ebay:EBAY});
 As.equal(await p.evaluate(()=>WD.ebay.mode),'live');As.equal(await p.$eval('#srcSel option[value=ebay_browse]',o=>o.disabled),false);
 await p.fill('#what','Sony WH-1000XM5 headphones');await p.evaluate(()=>WD.preview());
+As.ok(!/Live price from eBay/.test(await p.textContent('#livePrev')),'description matched eBay');
+ok('typing a product description does not attach an eBay price');
+await p.click('[data-t=share]');await p.click('#popList button[data-pop=sony-wh-1000xm5]');
 let pv=await p.textContent('#livePrev');
 As.match(pv,/Live price from eBay – checked 24 Oct, 1[23]:37/);As.match(pv,/lowest £249\.99 \(new, Buy It Now, \+ £3\.49 delivery\)/);
 As.match(pv,/Typical price on eBay: £272\.00 \(median of 4 listings\)\. That’s eBay’s typical asking price, not an RRP\./);As.match(pv,/Suggested target: £244\.80, 10% below eBay’s typical price/);
 As.equal(await p.inputValue('#price'),'272.00');As.equal(await p.inputValue('#pct'),'10');As.equal(await p.inputValue('#srcSel'),'ebay_browse');
 As.equal(await p.$eval('#livePrev a',a=>a.href),'https://www.ebay.co.uk/itm/112');
-ok('live: typing a watched item shows "Live price from eBay – checked <time>", lowest + delivery, "Typical price on eBay: £272.00 (median of 4 listings)" (not RRP), suggests £244.80 = 10% below typical and pre-fills it');
+ok('picking the catalogue item (not typing the description) shows "Live price from eBay – checked <time>", lowest + delivery, "Typical price on eBay: £272.00 (median of 4 listings)" (not RRP), suggests £244.80 = 10% below typical and pre-fills it');
 await p.click('#submitBtn');await p.waitForTimeout(300);
 let it=await p.evaluate(()=>WD.state().items.at(-1));
-As.equal(it.src,'ebay_browse');As.equal(it.orig,27200);As.equal(it.pct,10);As.equal(it.cur,24999);As.equal(it.refSrc,'ebay_typical');As.equal(it.rec.source,'ebay_browse');V(it.rec,'added');As.equal(it.pt.t,AT);
+As.equal(it.src,'ebay_browse');As.equal(it.watchId,'sony-wh-1000xm5');As.equal(it.orig,27200);As.equal(it.pct,10);As.equal(it.cur,24999);As.equal(it.refSrc,'ebay_typical');As.equal(it.rec.source,'ebay_browse');V(it.rec,'added');As.equal(it.pt.t,AT);
 As.ok(!(await p.evaluate(()=>(WD.state().pending||[]).length)),'watched item queued');
 let card=await p.textContent('.card:last-child');
 As.match(card,/Price: eBay, live price · eBay/);As.match(card,/checked 24 Oct, 1[23]:37/);As.match(card,/Typical price on eBay: £272\.00 \(median of 4 listings, checked 24 Oct/);As.match(card,/not an RRP/);
@@ -88,10 +91,11 @@ ok('no unlabelled prices on cards; Sources lists eBay as Live with the not-an-RR
 // 9. stale eBay data (>24h) is not shown
 p=await open({ebay:EBAY,clock:'2026-10-25T13:00:00Z'});await p.fill('#what','Sony WH-1000XM5 headphones');await p.evaluate(()=>WD.preview());pv=await p.textContent('#livePrev');
 As.ok(!/Live price from eBay/.test(pv),pv);
-st=await p.evaluate(()=>WD.ebay.getPrice({id:'s',name:'Sony WH-1000XM5 headphones',url:''}));As.equal(st.error_state,'not_found');As.match(st.error_detail,/older than 24h/);V(st,'stale');
+const named=await p.evaluate(()=>WD.ebay.getPrice({id:'s',name:'Sony WH-1000XM5 headphones',url:''}));As.match(named.error_detail,/watch list/);
+st=await p.evaluate(()=>WD.ebay.getPrice({id:'s',name:'Sony WH-1000XM5 headphones',url:'',watchId:'sony-wh-1000xm5'}));As.equal(st.error_state,'not_found');As.match(st.error_detail,/older than 24h/);V(st,'stale');
 await p.context().close();ok('eBay records older than 24h are not shown (not_found "older than 24h")');
 // 10. shared list keeps the eBay label
-p=await open({ebay:EBAY});await p.fill('#what','Sony WH-1000XM5 headphones');await p.evaluate(()=>WD.preview());await p.click('#submitBtn');await p.waitForTimeout(300);
+p=await open({ebay:EBAY});await p.click('[data-t=share]');await p.click('#popList button[data-pop=sony-wh-1000xm5]');await p.click('#submitBtn');await p.waitForTimeout(300);
 const su=await p.evaluate(()=>WD.shareUrl());await p.goto(su);await p.waitForSelector('#roView:not([hidden])');As.match(await p.textContent('#roList'),/eBay, live price · checked 24 Oct/);await p.context().close();
 ok('shared read-only list labels the price "eBay, live price" with its check time');
 console.log(log.join('\n'));await b.close()})().catch(e=>{console.error(log.join('\n'));console.error(e);process.exit(1)});

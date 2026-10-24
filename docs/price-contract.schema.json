@@ -25,6 +25,7 @@
     "error_state": {"type":"string","enum":["ok","not_found","blocked","changed"]},
     "error_detail": {"type":["string","null"]},
     "watch_id": {"type":"string","description":"ebay_browse only: id of the watch-list item (data/watchlist.json) this record answers"},
+    "sku": {"type":"string","pattern":"^DC[0-9A-HJKMNP-TV-Z]{10}$","description":"Drop Club catalogue id. The same product at every retailer. Not a shop's own SKU. Minted from a GTIN or from a watch-list id, never from a title."},
     "market_stats": {"type":"object","description":"ebay_browse only: spread of matching new Buy It Now GBP listings after trimming outliers (Tukey 1.5xIQR). median = 'typical price on eBay', never an RRP","required":["lowest","median","mean","count"],"additionalProperties":false,"properties":{"lowest":{"type":"integer","minimum":0},"median":{"type":"integer","minimum":0},"mean":{"type":"integer","minimum":0},"count":{"type":"integer","minimum":1},"trimmed":{"type":"integer","minimum":0},"basis":{"type":"string"}}}
   }
 }

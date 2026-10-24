@@ -8,9 +8,14 @@
     "test:ebay-app": "node build/test-ebay-app.js",
     "test:mirror": "node scripts/test-fetch-hukd.mjs",
     "test:ebay": "node scripts/test-fetch-ebay.mjs",
+    "test:sku": "node scripts/test-sku.mjs",
+    "test:store": "node scripts/test-price-store.mjs",
     "qa": "node qa/qa.js",
-    "test": "npm run build && npm run test:mirror && npm run test:ebay && npm run test:unit && npm run test:ebay-app && npm run qa",
+    "test": "npm run build && npm run test:sku && npm run test:store && npm run test:mirror && npm run test:ebay && npm run test:unit && npm run test:ebay-app && npm run qa",
     "browser": "playwright-core install chromium"
+  },
+  "dependencies": {
+    "mysql2": "^3.11.5"
   },
   "devDependencies": {
     "ajv": "^8.17.1",

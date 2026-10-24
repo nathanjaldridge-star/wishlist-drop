@@ -23,7 +23,9 @@
 // Env (tests): EBAY_API_BASE, EBAY_WATCHLIST, EBAY_OUT, EBAY_LOG, EBAY_NOW (ISO), EBAY_DELAY_MS, EBAY_TIMEOUT_MS, EBAY_MAX_CALLS.
 import { writeFileSync, readFileSync, existsSync, renameSync, mkdirSync, appendFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { skuForWatch } from './sku.mjs';
+import { persistRows, rowFromEbay } from './price-store.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const env = process.env;
@@ -81,7 +83,7 @@ export function stats(list) {
 
 /** Parse a Browse item_summary/search response for one watch item. Pure. */
 export function parseSearch(json, w, nowIso) {
-  const base = { product_id: `ebay:watch:${w.id}`, canonical_url: `https://www.ebay.co.uk/sch/i.html?_nkw=${encodeURIComponent(w.query)}`, retailer: 'eBay', title: w.title, current_price: null, currency: 'GBP', fetched_at: nowIso, in_stock: null, was_price: null, is_promo: false, promo_code: null, delivery_cost: null, price_history: [], source: 'ebay_browse', confidence: 0, watch_id: w.id };
+  const base = { product_id: `ebay:watch:${w.id}`, canonical_url: `https://www.ebay.co.uk/sch/i.html?_nkw=${encodeURIComponent(w.query)}`, retailer: 'eBay', title: w.title, current_price: null, currency: 'GBP', fetched_at: nowIso, in_stock: null, was_price: null, is_promo: false, promo_code: null, delivery_cost: null, price_history: [], source: 'ebay_browse', confidence: 0, watch_id: w.id, sku: skuForWatch(w.id) };
   if (!json || typeof json !== 'object' || (json.itemSummaries !== undefined && !Array.isArray(json.itemSummaries)) || (json.itemSummaries === undefined && typeof json.total !== 'number'))
     return { ...base, error_state: 'changed', error_detail: 'eBay response did not have the expected itemSummaries list.' };
   const rows = (json.itemSummaries || []).map((it) => {
@@ -158,13 +160,15 @@ export async function run(o = {}) {
   }
   const out = { version: 1, generated_at: nowIso, source: 'ebay_browse', marketplace: MARKETPLACE, status, calls,
     label: 'Live prices from the eBay Browse API (new, Buy It Now, GBP, UK delivery). Typical price = median of matching listings with outliers trimmed; it is not an RRP.',
-    watchlist_count: WL.items.length, watchlist: WL.items.map((w) => ({ id: w.id, title: w.title })), items, meta };
+    watchlist_count: WL.items.length, watchlist: WL.items.map((w) => ({ id: w.id, title: w.title, sku: skuForWatch(w.id) })), items, meta };
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT + '.tmp', JSON.stringify(out) + '\n'); renameSync(OUT + '.tmp', OUT);
   if (logLines.length) { mkdirSync(dirname(LOG), { recursive: true }); appendFileSync(LOG, logLines.map((l) => JSON.stringify(l)).join('\n') + '\n'); }
+  const dbRows = logLines.map(rowFromEbay).filter(Boolean);
+  if (dbRows.length) { try { const saved = await persistRows(dbRows); if (!saved.skipped) console.log(`mysql: ${saved.observations} observations`); } catch (e) { warn('mysql: ' + (e && e.message ? e.message : e)); } }
   const n = (s) => items.filter((r) => r.error_state === s).length;
   console.log(`eBay: ${items.length} items (ok ${n('ok')}, not_found ${n('not_found')}, blocked ${n('blocked')}, changed ${n('changed')}), ${calls} API calls, logged ${logLines.length}, status ${status}`);
   return { out, logLines, calls };
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) run().catch((e) => { console.error(e); process.exit(1); });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) run().catch((e) => { console.error(e); process.exit(1); });

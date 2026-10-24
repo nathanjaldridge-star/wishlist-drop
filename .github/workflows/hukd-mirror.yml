@@ -19,6 +19,8 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     timeout-minutes: 4
+    env:
+      MYSQL_URL: ${{ secrets.MYSQL_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -27,6 +29,9 @@ jobs:
         with: { node-version: 20 }
       - name: Self-test the fetcher (offline, local server)
         run: node scripts/test-fetch-hukd.mjs
+      - name: Install the MySQL client when a database is configured
+        if: env.MYSQL_URL != ''
+        run: npm install --omit=dev
       - name: Fetch due feeds (conditional GET, 15s timeout, validated, merchant-filtered; appends price log)
         env: { HUKD_OUT: mirror/hukd.json, HUKD_LOG: mirror/price-log.jsonl }
         run: node scripts/fetch-hukd.mjs
