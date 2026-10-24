@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.*
+# test by-products written to the repo root
+/screenshot*.png
+/share-card.png

@@ -1,11 +1,11 @@
 const {chromium}=require('playwright-core');const As=require('assert');const fs=require('fs');
 const Ajv=require('ajv/dist/2020');const addFormats=require('ajv-formats');
 const ajv=new Ajv({allErrors:true,strict:false});addFormats(ajv);
-const validate=ajv.compile(JSON.parse(fs.readFileSync('/workspace/deal-sources/price-contract.schema.json')));
+const validate=ajv.compile(JSON.parse(fs.readFileSync(require('path').resolve(__dirname,'..')+'/'+'docs/price-contract.schema.json')));
 const V=(r,tag)=>{if(!validate(r))throw new Error(tag+' invalid: '+JSON.stringify(validate.errors)+JSON.stringify(r))};
-JSON.parse(fs.readFileSync('/workspace/deal-sources/price-contract-examples.json')).forEach((r,i)=>V(r,'example'+i));
-const D='/workspace/wishlist-drop/';const log=[];const ok=m=>{log.push('✓ '+m)};
-(async()=>{const b=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+JSON.parse(fs.readFileSync(require('path').resolve(__dirname,'..')+'/'+'docs/price-contract-examples.json')).forEach((r,i)=>V(r,'example'+i));
+const D=require('path').resolve(__dirname,'..')+'/';const log=[];const ok=m=>{log.push('✓ '+m)};
+(async()=>{const b=await chromium.launch({executablePath:process.env.CHROME_PATH||undefined,args:['--no-sandbox']});
 // Pin the deal-freshness clock to the embedded HUKD snapshot (16-17 Oct 2026) so matches aren't 'stale' (48h rule). Tests can override WD_CLOCK.
 {const _nc=b.newContext.bind(b);b.newContext=async(o)=>{const c=await _nc(o);await c.addInitScript(()=>{if(!window.WD_CLOCK)window.WD_CLOCK='2026-10-17T12:00:00Z'});return c}}
 const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:1});const p=await ctx.newPage();

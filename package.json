@@ -1,0 +1,19 @@
+{
+  "name": "drop-club",
+  "private": true,
+  "description": "Drop Club (wishlist price-drop alerts). Static site on GitHub Pages; these deps are for build/tests only.",
+  "scripts": {
+    "build": "node build/build.js",
+    "test:unit": "node build/test.js",
+    "test:mirror": "node scripts/test-fetch-hukd.mjs",
+    "qa": "node qa/qa.js",
+    "test": "npm run build && npm run test:mirror && npm run test:unit && npm run qa",
+    "browser": "playwright-core install chromium"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "axe-core": "^4.10.0",
+    "playwright-core": "^1.48.0"
+  }
+}

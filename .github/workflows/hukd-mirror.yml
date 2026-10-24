@@ -1,4 +1,4 @@
-# READY TO ACTIVATE: move to .github/workflows/hukd-mirror.yml (needs a token with the `workflow` scope, or the GitHub web UI).
+# LIVE since 24 Oct 2026. Editing this file needs a token with the `workflow` scope (or the GitHub web UI).
 # Free on public repos. Fetches ONLY public HotUKDeals RSS feeds; no retailer pages.
 #
 # Cadence: the plan wants /rss/new every 5 min (2 min from 20 Nov to 1 Dec). GitHub Actions' shortest schedule is every
