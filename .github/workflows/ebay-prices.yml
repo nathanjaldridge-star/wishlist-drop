@@ -1,0 +1,53 @@
+# eBay live prices (issue #11). Free on public repos. Calls ONLY eBay's official Browse API (EBAY_GB), never web pages.
+# Switches itself on when the two repo secrets EBAY_CLIENT_ID and EBAY_CLIENT_SECRET exist (Settings > Secrets and variables >
+# Actions). Until then every run logs "eBay keys not set yet – skipping" and succeeds without touching anything.
+# Setup steps: docs/ebay-setup.md. Output: data branch ebay.json (latest snapshot) + appended lines in price-log.jsonl.
+# Budget: 1 token + 1 search per watch-list item per run; 10 items every 30 min = ~530 calls/day of the free 5,000.
+name: eBay live prices
+on:
+  schedule: [{ cron: '7,37 * * * *' }]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: ebay-prices, cancel-in-progress: false }
+jobs:
+  prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+      EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+    steps:
+      - name: Check for eBay keys
+        id: keys
+        run: |
+          if [ -z "$EBAY_CLIENT_ID" ] || [ -z "$EBAY_CLIENT_SECRET" ]; then
+            echo "eBay keys not set yet – skipping"; echo "have=no" >> "$GITHUB_OUTPUT"
+          else echo "have=yes" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.keys.outputs.have == 'yes'
+        uses: actions/checkout@v4
+      - if: steps.keys.outputs.have == 'yes'
+        uses: actions/checkout@v4
+        with: { ref: data, path: mirror }
+      - if: steps.keys.outputs.have == 'yes'
+        uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Self-test the fetcher (offline mock, no real calls)
+        if: steps.keys.outputs.have == 'yes'
+        run: env -u EBAY_CLIENT_ID -u EBAY_CLIENT_SECRET node scripts/test-fetch-ebay.mjs
+      - name: Fetch eBay prices for the watch list
+        if: steps.keys.outputs.have == 'yes'
+        env: { EBAY_OUT: mirror/ebay.json, EBAY_LOG: mirror/price-log.jsonl, EBAY_WATCHLIST: data/watchlist.json }
+        run: node scripts/fetch-ebay.mjs
+      - name: Commit to the data branch if changed
+        if: steps.keys.outputs.have == 'yes'
+        working-directory: mirror
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Both mirror jobs append to price-log.jsonl: union-merge keeps both sides' lines instead of conflicting.
+          echo 'price-log.jsonl merge=union' >> .git/info/attributes
+          git add ebay.json price-log.jsonl
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "data: eBay prices $(date -u +%FT%TZ)"
+          for i in 1 2 3; do git pull --rebase && git push && exit 0; sleep $((i*5)); done; exit 1

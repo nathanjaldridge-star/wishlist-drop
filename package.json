@@ -5,9 +5,11 @@
   "scripts": {
     "build": "node build/build.js",
     "test:unit": "node build/test.js",
+    "test:ebay-app": "node build/test-ebay-app.js",
     "test:mirror": "node scripts/test-fetch-hukd.mjs",
+    "test:ebay": "node scripts/test-fetch-ebay.mjs",
     "qa": "node qa/qa.js",
-    "test": "npm run build && npm run test:mirror && npm run test:unit && npm run qa",
+    "test": "npm run build && npm run test:mirror && npm run test:ebay && npm run test:unit && npm run test:ebay-app && npm run qa",
     "browser": "playwright-core install chromium"
   },
   "devDependencies": {

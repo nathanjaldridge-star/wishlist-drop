@@ -15,7 +15,7 @@
   "id": "F3",
   "name": "Add by link → readable name, URL kept",
   "ok": true,
-  "note": "Sony Wireless Headphones Black 10240179"
+  "note": "Sony Wh1000xm5 Wireless Headphones Black"
  },
  {
   "id": "F4",
@@ -135,7 +135,7 @@
   "id": "S1",
   "name": "Share link round-trip: 10 items with unicode, emoji, quotes, long names",
   "ok": true,
-  "note": "URL length 1318"
+  "note": "URL length 2268"
  },
  {
   "id": "S2",
@@ -398,6 +398,60 @@
  {
   "id": "DC2",
   "name": "Default palette audit: only black/white/grey + orange (no blue, teal, purple, green, red) on drops, error states, deal box, alerts, Top 10 + card, read-only, dialog; pills orange or black only",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "XM1",
+  "name": "Christmas mode: off by default (Oct), ?season=xmas on, ?season=off off, auto-on in Dec only (mocked dates; Europe/London month even when browser is in New York or Tokyo), toggle visibility + persistence + param wins",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "XM2",
+  "name": "Share card in Christmas mode shows MY CHRISTMAS DROPS + \"Top N Christmas list\" and bell; normal mode does not",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "PB1",
+  "name": "Public URL (no ?demo=1): no simulated prices, no DEMO adapter/offers, no Simulate/auto-simulate, no seeded examples; Beta tag; no-match items say \"Watching — no live price yet\"; every visible £ price has a source badge + checked-at time (Drops, Alerts, Top 10, read-only); axe 0 violations",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "PB2",
+  "name": "Public URL sanitises old DEMO data: examples removed, simulated prices/offers/alerts dropped, auto-simulate off; old DEMO share links stay labelled DEMO",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "PB3",
+  "name": "?demo=1 still shows everything labelled DEMO: banner, seeded examples, Simulate, DEMO prices/offers/Top 10/alerts/share card",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "RF1",
+  "name": "Baseline = LOWEST price seen in the prior 30 days at the same retailer (older obs, other retailers, RRP/entered price and \"was\" prices ignored); drop ≥10%, strong ≥20%; no history → no drop maths",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "AL1",
+  "name": "Alerts say \"Reported deal (community reported)\" until 30 days of history (no \"lowest price\" claims), \"Price drop … in the last 30 days\" after; HUKD alerts link back to the thread",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "ST1",
+  "name": "Deals stale after 48h (24h in Black Friday week 20 Nov–1 Dec, Europe/London); stale matches give no price and say why",
+  "ok": true,
+  "note": ""
+ },
+ {
+  "id": "VC1",
+  "name": "Mirror v2 (deals + vouchers): fresh vouchers shown as \"Reported voucher … unverified\", never \"working\"; codes say who posted them and when; every HUKD item links back to its thread; stale/off-site entries ignored",
   "ok": true,
   "note": ""
  },
