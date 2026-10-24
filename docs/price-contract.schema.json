@@ -20,9 +20,11 @@
     "promo_code": {"type":["string","null"],"description":"Only from a source feed; never generated"},
     "delivery_cost": {"type":["integer","null"],"minimum":0},
     "price_history": {"type":"array","items":{"type":"object","required":["date","price"],"additionalProperties":false,"properties":{"date":{"type":"string","format":"date-time"},"price":{"type":["integer","null"],"minimum":0}}}},
-    "source": {"type":"string","enum":["awin_feed","awin_promotions","keepa","hukd_rss","manual"]},
+    "source": {"type":"string","enum":["awin_feed","awin_promotions","keepa","hukd_rss","ebay_browse","manual"]},
     "confidence": {"type":"number","minimum":0,"maximum":1},
     "error_state": {"type":"string","enum":["ok","not_found","blocked","changed"]},
-    "error_detail": {"type":["string","null"]}
+    "error_detail": {"type":["string","null"]},
+    "watch_id": {"type":"string","description":"ebay_browse only: id of the watch-list item (data/watchlist.json) this record answers"},
+    "market_stats": {"type":"object","description":"ebay_browse only: spread of matching new Buy It Now GBP listings after trimming outliers (Tukey 1.5xIQR). median = 'typical price on eBay', never an RRP","required":["lowest","median","mean","count"],"additionalProperties":false,"properties":{"lowest":{"type":"integer","minimum":0},"median":{"type":"integer","minimum":0},"mean":{"type":"integer","minimum":0},"count":{"type":"integer","minimum":1},"trimmed":{"type":"integer","minimum":0},"basis":{"type":"string"}}}
   }
 }

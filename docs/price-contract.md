@@ -1,5 +1,5 @@
 # Wishlist Drop price contract
-Files: `price-contract.schema.json` (JSON Schema 2020-12) and `price-contract-examples.json` (3 records, all labelled EXAMPLE, all values fake, and they validate against the schema).
+Files: `price-contract.schema.json` (JSON Schema 2020-12) and `price-contract-examples.json` (4 records, all labelled EXAMPLE, all values fake, and they validate against the schema).
 
 Conventions:
 - All prices are integers in **minor units (pence)**.
@@ -85,3 +85,21 @@ Verified from https://www.hotukdeals.com/rss/hot fetched 17 Oct 2026 (`hukd_samp
 | Uniqlo | ✅ seen in feed | verify | n/a |
 
 "Seen in feed" only means the merchant appeared in a single `/rss/hot` snapshot. Coverage of a specific wishlist item is not guaranteed. I made no claim that any of these retailers is on Awin, because I didn't check a public Awin page that shows it.
+
+## eBay Browse API (`source: "ebay_browse"`) ✅ (adapter built 24 Oct 2026; live once the keys are added, see `docs/ebay-setup.md`)
+Fetched server-side only by `scripts/fetch-ebay.mjs` (GitHub Actions, every 30 min) from `GET /buy/browse/v1/item_summary/search` with `X-EBAY-C-MARKETPLACE-ID: EBAY_GB`, filter `buyingOptions:{FIXED_PRICE},conditionIds:{1000},deliveryCountry:GB`, GBP listings only. Snapshot on the `data` branch: `ebay.json`; changes are appended to `price-log.jsonl`.
+
+| Contract | Browse `itemSummaries[]` field |
+|---|---|
+| product_id | `ebay:` + `legacyItemId` (or the middle part of `itemId` `v1\|<id>\|0`) of the cheapest matching listing |
+| canonical_url | `itemWebUrl` with the query string removed. No affiliate params (eBay Partner Network hook is disabled) |
+| retailer | `eBay` |
+| current_price | lowest `price.value` (GBP) after trimming outliers, in pence (string-parsed, no float maths) |
+| delivery_cost | first GBP `shippingOptions[].shippingCost.value`, pence |
+| was_price | always null (we never use RRP/"was") |
+| in_stock | true for an ok record (an active Buy It Now listing) |
+| confidence | 0.5 + 0.1 per matching listing, capped at 0.9 |
+| watch_id | the `data/watchlist.json` item the record answers (optional field, eBay only) |
+| market_stats | `{lowest, median, mean, count, trimmed, basis}` over the matching listings after a Tukey 1.5×IQR trim. **median = "typical price on eBay"**, not an RRP (optional field, eBay only) |
+
+error_state: `not_found` = no new Buy It Now GBP listing matched; `blocked` = HTTP 429 (we stop the run), 401/403, or a failed request with no previous record; `changed` = the response lost its `itemSummaries` list.

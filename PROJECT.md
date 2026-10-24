@@ -48,6 +48,8 @@ npm run browser             # one-off: downloads Chromium for the tests
 npm run build               # = node build/build.js  (regenerates index.html)
 npm run test:mirror         # HUKD fetcher, offline (~2s)
 npm run test:unit           # build/test.js: price contract + app behaviour (~10s)
+npm run test:ebay           # scripts/test-fetch-ebay.mjs: eBay fetcher with mocked eBay (~2s)
+npm run test:ebay-app       # build/test-ebay-app.js: eBay adapter, URL parsing, live preview (~35s)
 npm run qa                  # qa/qa.js: full UI/QA suite, 77 checks, ~5 min; writes screenshots to qa/
 npm test                    # all of the above
 ```
@@ -60,6 +62,8 @@ To use an installed Chrome instead of the downloaded one, set `CHROME_PATH=/path
 | `index.html` | Built output served by Pages. Don't hand-edit |
 | `build/build.js`, `build/hukd_sample.xml` | Build step and the embedded HUKD snapshot |
 | `scripts/fetch-hukd.mjs`, `scripts/hukd-config.json` | HotUKDeals RSS mirror (run by the workflow) |
+| `scripts/fetch-ebay.mjs`, `data/watchlist.json` | eBay Browse API live prices for the watch list (#11). Setup: `docs/ebay-setup.md` |
+| `.github/workflows/ebay-prices.yml` | Every-30-minute eBay fetch → `data` branch (`ebay.json`, `price-log.jsonl`). Skips cleanly until the `EBAY_CLIENT_ID`/`EBAY_CLIENT_SECRET` secrets exist |
 | `.github/workflows/hukd-mirror.yml` | Every-5-minute mirror → `data` branch (`hukd.json`, `price-log.jsonl`) |
 | `docs/price-contract*.{md,json}` | Price record format every adapter must return |
 | `docs/cloudflare-worker-cron.md` | 2-minute polling plan for BF week |

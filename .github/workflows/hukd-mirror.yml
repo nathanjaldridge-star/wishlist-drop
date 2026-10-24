@@ -35,6 +35,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The eBay job (ebay-prices.yml) also appends to price-log.jsonl: union-merge keeps both sides' lines.
+          echo 'price-log.jsonl merge=union' >> .git/info/attributes
           git add hukd.json price-log.jsonl
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -m "data: HotUKDeals mirror $(date -u +%FT%TZ)"
