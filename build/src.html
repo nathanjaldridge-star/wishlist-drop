@@ -348,8 +348,9 @@ var HukdAdapter={id:'hukd_rss',name:'HotUKDeals (RSS)',label:'Community reported
 /* ---------- eBay Browse API adapter (issue #11) ----------
    The browser never talks to eBay: a GitHub Actions job (scripts/fetch-ebay.mjs) checks the watch list (data/watchlist.json)
    and publishes data-branch ebay.json. This adapter reads that snapshot. It stays "awaiting approval" (disabled) until the
-   snapshot has at least one ok record, so no eBay price is ever shown before it is real. Records older than 24h are not shown. */
-var EBAY_DATA='https://raw.githubusercontent.com/nathanjaldridge-star/wishlist-drop/data/ebay.json',EBAY_MAX_AGE_H=24,EBAY_WAIT='Awaiting approval: eBay is reviewing our developer account. Live eBay prices switch on automatically once the keys are added.';
+   snapshot has at least one ok record, so no eBay price is ever shown before it is real. eBay's API licence lets us show listing
+   data at most 6 hours older than eBay, so records older than 6h are not shown (the job runs every 30 minutes). */
+var EBAY_DATA='https://raw.githubusercontent.com/nathanjaldridge-star/wishlist-drop/data/ebay.json',EBAY_MAX_AGE_H=6,EBAY_WAIT='Awaiting approval: eBay is reviewing our developer account. Live eBay prices switch on automatically once the keys are added.';
 var EbayAdapter={id:'ebay_browse',name:'eBay (live prices)',label:null,enabled:false,mode:'loading',recs:[],watch:{},at:null,note:EBAY_WAIT,detail:EBAY_WAIT,
  init:function(force){var self=this;if(self._p&&!force)return self._p;self._p=new Promise(function(res){
    var src=window.WD_EBAY||(location.protocol==='https:'?EBAY_DATA:null);if(!src||!window.fetch){self.setData(null,'off');res();return}
@@ -360,20 +361,42 @@ var EbayAdapter={id:'ebay_browse',name:'eBay (live prices)',label:null,enabled:f
   self.at=j&&j.generated_at||null;var live=self.recs.some(function(r){return r.error_state==='ok'});self.enabled=live;self.mode=live?'live':(why||'awaiting');self.label=live?'Live price':null;
   self.note=live?'Live prices from the eBay Browse API: new, Buy It Now, UK delivery. Typical price = median of matching listings, not an RRP. Last checked '+fmtT(self.at)+'.':EBAY_WAIT;self.detail=self.note},
  titleOf:function(r){return this.watch[r.watch_id]||r.title},
- lookup:function(item){var self=this,id=item.pid&&item.pid.ebayId,best=null;self.recs.forEach(function(r){var s=id&&r.product_id==='ebay:'+id?1:Math.max(matchScore(item.name,self.titleOf(r)),matchScore(item.name,r.title));if(s>0&&(!best||s>best.s))best={r:r,s:s}});return best&&best.s>=.6?best:null},
+ /* Match order: the item's catalogue id, then a pasted eBay item id, then the typed name (fuzzy, 0.6 or better). */
+ lookup:function(item){var self=this,id=item.pid&&item.pid.ebayId,best=null;self.recs.forEach(function(r){var s=item.cid&&r.catalogue_id===item.cid||id&&r.product_id==='ebay:'+id?1:Math.max(matchScore(item.name,self.titleOf(r)),matchScore(item.name,r.title));if(s>0&&(!best||s>best.s))best={r:r,s:s}});return best&&best.s>=.6?best:null},
  fresh:function(r){return clockNow()-Date.parse(r.fetched_at)<=EBAY_MAX_AGE_H*36e5},
  popular:function(){var self=this;return self.recs.filter(function(r){return r.error_state==='ok'&&self.fresh(r)})},
  getPrice:function(item){var self=this;return self.init().then(function(){if(!self.enabled)return errRecord(item,'ebay_browse','blocked','Awaiting approval: eBay live prices are not connected yet.');
   var m=self.lookup(item);if(!m)return errRecord(item,'ebay_browse','not_found','Not on our eBay watch list yet.');
   if(m.r.error_state==='ok'&&!self.fresh(m.r))return errRecord(item,'ebay_browse','not_found','The last eBay check ('+fmtT(m.r.fetched_at)+') is older than '+EBAY_MAX_AGE_H+'h, so we are not showing it.');
   var r=JSON.parse(JSON.stringify(m.r));r._match=m.s;return r})}};
+/* ---------- Drop Club price history (prices.json) ----------
+   A GitHub Actions job loads price checks into Drop Club's database (scripts/db) and publishes data-branch prices.json: one row
+   per catalogue product and shop. The browser never talks to the database. 30-day lows appear only for sources whose licence
+   allows price history (never eBay), and only after 30 days of history; until then the row says history is still building. */
+var PRICES_DATA='https://raw.githubusercontent.com/nathanjaldridge-star/wishlist-drop/data/prices.json',CID_A='0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+function cidOk(s){if(typeof s!=='string'||!/^DC[0-9A-HJKMNP-TV-Z]{10}$/.test(s))return false;var f=2,sum=0;for(var i=10;i>=2;i--){var a=f*CID_A.indexOf(s[i]);f=f===2?1:2;sum+=Math.floor(a/32)+a%32}return CID_A[(32-sum%32)%32]===s[11]}
+var Prices={rows:[],titles:{},at:null,
+ init:function(){var self=this;if(self._p)return self._p;self._p=new Promise(function(res){var src=window.WD_PRICES||(location.protocol==='https:'?PRICES_DATA:null);if(!src||!window.fetch){res();return}
+   var ctl=window.AbortController?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},5000);
+   fetch(src,{cache:'no-cache',signal:ctl&&ctl.signal}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(j){clearTimeout(to);self.setData(j)}).catch(function(){clearTimeout(to)}).then(res)});return self._p},
+ setData:function(j){var self=this;self.titles={};self.at=j&&j.generated_at||null;
+  self.rows=(j&&Array.isArray(j.items)?j.items:[]).filter(function(r){return r&&cidOk(r.catalogue_id)&&r.market==='GB'&&r.currency==='GBP'&&r.current_price>0&&!isNaN(Date.parse(r.checked_at))});
+  self.rows.forEach(function(r){if(r.title)self.titles[r.catalogue_id]=String(r.title)})},
+ cidFor:function(item){var self=this,best=null;Object.keys(self.titles).forEach(function(c){var s=matchScore(item.name,self.titles[c]);if(!best||s>best.s)best={c:c,s:s}});return best&&best.s>=.6?best.c:null},
+ lines:function(it){if(!it.cid)return[];return this.rows.filter(function(r){return r.catalogue_id===it.cid&&r.baseline_allowed}).slice(0,3).map(function(r){var shop=r.retailer_name||r.retailer,ex=r.example?' (EXAMPLE data)':'';
+   var age=r.fresh===false?' \u00b7 last checked '+fmtT(r.checked_at):'';
+   if(r.building_history||r.low_30d==null)return'Drop Club price history at '+shop+': '+gbp(r.current_price)+', still building ('+(r.history_days|0)+' of 30 days)'+age+ex;
+   return'Drop Club 30-day low at '+shop+': '+gbp(r.low_30d)+' (now '+gbp(r.current_price)+')'+age+ex})}};
+/* Give an item its catalogue id: from the eBay record it matched (catalogue id, pasted eBay id, or typed name), else from a
+   catalogue title in prices.json that the typed name matches. Never changed once set. */
+function linkCid(it){if(it.cid)return;var e=EbayAdapter.lookup(it);if(e&&cidOk(e.r.catalogue_id)){it.cid=e.r.catalogue_id;return}var c=Prices.cidFor(it);if(c)it.cid=c}
 function typText(r,withTime){var t=r&&r.market_stats;if(!t)return'';return'Typical price on eBay: '+gbp(t.median)+' (median of '+t.count+' listing'+(t.count==1?'':'s')+(withTime===false?'':', checked '+fmtT(r.fetched_at))+')'}
 var ADAPTERS=[DemoAdapter,HukdAdapter,ManualAdapter,Stub('awin_feed','Awin product feed','awin_feed'),Stub('awin_promotions','Awin promotions/vouchers','awin_promotions'),Stub('keepa','Keepa (Amazon UK)','keepa'),EbayAdapter];
 var DEF_SRC=WD_DEMO?'demo':'hukd_rss';var A=function(id){return ADAPTERS.filter(function(a){return a.id===id})[0]||A(DEF_SRC)};
 function stripPriv(r){var o={};for(var k in r)if(k.charAt(0)!=='_')o[k]=r[k];return o}
 
 /* ================= State ================= */
-function cleanItem(i){if(!i||typeof i!=='object'||!(+i.orig>=1))return null;i.id=String(i.id||uid());i.name=String(i.name==null?'Item':i.name).slice(0,200);i.url=safeUrl(i.url);i.orig=Math.round(+i.orig);i.cur=i.cur!=null&&+i.cur>=0?Math.round(+i.cur):null;i.pct=Math.min(20,Math.max(10,Math.round(+i.pct)||DEF_PCT));if(A(i.src).id!==i.src||!A(i.src).enabled&&i.src!=='ebay_browse')i.src=DEF_SRC;if(!Array.isArray(i.hist))i.hist=[];i.hist=i.hist.filter(function(h){return h&&typeof h.price==='number'});return i}
+function cleanItem(i){if(!i||typeof i!=='object'||!(+i.orig>=1))return null;i.id=String(i.id||uid());i.name=String(i.name==null?'Item':i.name).slice(0,200);i.url=safeUrl(i.url);i.orig=Math.round(+i.orig);i.cur=i.cur!=null&&+i.cur>=0?Math.round(+i.cur):null;i.pct=Math.min(20,Math.max(10,Math.round(+i.pct)||DEF_PCT));if(A(i.src).id!==i.src||!A(i.src).enabled&&i.src!=='ebay_browse')i.src=DEF_SRC;if(!Array.isArray(i.hist))i.hist=[];i.hist=i.hist.filter(function(h){return h&&typeof h.price==='number'});if(i.cid!=null&&!cidOk(i.cid))delete i.cid;return i}
 function load(){load0();sanitizePublic()}
 function load0(){try{var d=JSON.parse(localStorage.getItem(KEY));if(d&&Array.isArray(d.items)){S=d;d.items.forEach(function(i){if(i&&typeof i==='object'&&i.src==='demo')i._wasDemo=1});S.items=d.items.map(cleanItem).filter(Boolean).slice(0,MAX);S.alerts=Array.isArray(d.alerts)?d.alerts.filter(function(a){return a&&a.text}):[];return}}catch(e){}
  try{var v1=JSON.parse(localStorage.getItem('wishlistDrop.v1'));if(v1&&v1.items){S.items=v1.items.map(function(i){return{id:i.id,name:i.name,url:i.url,orig:toP(i.orig),cur:i.cur==null?toP(i.orig):toP(i.cur),pct:i.pct,src:'demo',hist:(i.hist||[]).map(function(p){return{date:nowIso(),price:toP(p)}}),hit:!!i.hit,example:i.example,added:new Date(i.added||Date.now()).toISOString()}});S.items.forEach(function(i){i._wasDemo=1});S.items=S.items.map(cleanItem).filter(Boolean).slice(0,MAX);S.alerts=[];S.seeded=true}}catch(e){}}
@@ -482,7 +505,7 @@ function livePreview(){var it=formItem(),box=$('livePrev');if(!it.name||it.name.
   box.innerHTML=html;box.hidden=false;box.dataset.match=er?'ebay':h?'hukd':'none';pre=p;
   if(p&&!editing&&!$('price')._touched){$('price').value=(p.price/100).toFixed(2);$('price')._auto=true;if(p.pct){$('pct').value=p.pct;setMode('pct')}if(A(p.src).enabled)$('srcSel').value=p.src;srcHint();conv()}
   else if(!p&&!editing&&!$('price')._touched&&$('price')._auto){$('price').value='';$('price')._auto=false;$('srcSel').value=DEF_SRC;srcHint();conv()}})}
-WD.preview=livePreview;WD.parseProductUrl=parseProductUrl;WD.ebay=EbayAdapter;
+WD.preview=livePreview;WD.parseProductUrl=parseProductUrl;WD.ebay=EbayAdapter;WD.prices=Prices;
 /* Pending items: wishlists live only in this browser, so the server-side eBay checker can't see them yet. We queue unmatched items
    locally (S.pending) so they can be sent to the checker's watch list when synced accounts (#5) and the scheduled checker (#6) ship. */
 function queuePending(it){if(EbayAdapter.lookup(it))return false;S.pending=Array.isArray(S.pending)?S.pending:[];var k=it.name.toLowerCase().trim();if(S.pending.some(function(x){return x.k===k}))return true;
@@ -503,7 +526,7 @@ function submitNow(){var v=$('what').value.trim();
  if(editing&&!S.items.some(function(x){return x.id==editing}))editing=null;
  if(!editing&&S.items.length>=MAX){msg($('msg'),'Your list is full (10 items max). Remove one to make room.','warn');return}
  if(editing){it=S.items.find(function(x){return x.id==editing});it.name=name;it.url=url;if(it.orig!==pence){it.orig=pence;it.cur=pence;it.hist=[]}it.pct=pct;it.src=src;it.hit=false;var okMsg='Saved changes \u2713'}
- else{it=mk(name,url,pence,pct,src);it.pid=url?parseProductUrl(url):null;if(pre&&!$('price')._touched&&pence===pre.price)it.refSrc=pre.ref;S.items.push(it);okMsg='Added \u201c'+name+'\u201d: watching for '+pct+'% off your reference \u2713';if(!WD_DEMO&&queuePending(it))okMsg+=' We\u2019ll start checking this item on eBay when synced lists launch; until then we check HotUKDeals.'}
+ else{it=mk(name,url,pence,pct,src);it.pid=url?parseProductUrl(url):null;if(pre&&!$('price')._touched&&pence===pre.price)it.refSrc=pre.ref;linkCid(it);S.items.push(it);okMsg='Added \u201c'+name+'\u201d: watching for '+pct+'% off your reference \u2713';if(!WD_DEMO&&queuePending(it))okMsg+=' We\u2019ll start checking this item on eBay when synced lists launch; until then we check HotUKDeals.'}
  S.started=true;resetForm();msg($('msg'),okMsg,'good');render();refreshItem(it).then(function(){save();render()})}
 
 /* ================= Render ================= */
@@ -538,7 +561,7 @@ function render(){$('count').textContent=S.items.length+'/10';$('welcome').hidde
   d.innerHTML='<div class="ct"><div><h3>'+esc(it.name)+'</h3>'+(safeUrl(it.url)?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener">'+esc(it.url.replace(/^https?:\/\//,'').slice(0,40))+'</a>':'')+srcTags(it)+'</div><span class="pill '+st[1]+'"'+(st[1]=='p-d'||st[1]=='p-t'?pillAttr(it):'')+'>'+st[0]+'</span></div>'+
   '<div class="pr" data-kind="'+(has?'obs':'ref')+'"><div class="stats"><div>Price<b'+(has?'':' class="nolive"')+'>'+(has?gbp(cur):'—')+'</b></div><div>30-day low<b'+(bv?'':' class="nolive"')+'>'+(bv?gbp(bv):'—')+'</b></div><div>vs low<b class="'+(ch==null?'':ch<0?'down':ch>0?'up':'')+'">'+(ch==null?'—':ch<0?(-ch).toFixed(0)+'% below':ch>0?'+'+ch.toFixed(1)+'%':'same')+'</b></div><div>Target −'+it.pct+'%<b>'+gbp(t)+'</b></div></div>'+
   '<div class="bar'+(prog>=100?' done':'')+'" role="progressbar" aria-label="Progress to target" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.round(prog)+'"><i style="width:'+prog+'%"></i></div>'+
-  '<p class="srcline">'+(has?'<span class="srcb">Price: '+esc(it.pt?it.pt.s+(it.pt.r&&it.pt.r!=='\u2014'?' \u00b7 '+it.pt.r:''):srcLabel(it.src))+'</span> \u00b7 '+timeHtml(it.pt&&it.pt.t):'<span class="srcb">Watching — no live price yet</span>')+(it.rec&&it.rec.error_state==='ok'&&it.rec.market_stats?'<br><span class="srcb typ">'+esc(typText(it.rec))+'</span>. That\u2019s eBay\u2019s typical asking price, not an RRP.':'')+'<br>'+esc(baseLabel(bs))+'<br>Target: '+it.pct+'% below '+(it.refSrc==='ebay_typical'?'eBay\u2019s typical price when you added it':it.refSrc==='hukd'?'the HotUKDeals price when you added it':'the price you entered')+' ('+gbp(it.orig)+'). That\u2019s your own goal, not a verified RRP.</p></div>'+
+  '<p class="srcline">'+(has?'<span class="srcb">Price: '+esc(it.pt?it.pt.s+(it.pt.r&&it.pt.r!=='\u2014'?' \u00b7 '+it.pt.r:''):srcLabel(it.src))+'</span> \u00b7 '+timeHtml(it.pt&&it.pt.t):'<span class="srcb">Watching — no live price yet</span>')+(it.rec&&it.rec.error_state==='ok'&&it.rec.market_stats?'<br><span class="srcb typ">'+esc(typText(it.rec))+'</span>. That\u2019s eBay\u2019s typical asking price, not an RRP.':'')+'<br>'+esc(baseLabel(bs))+Prices.lines(it).map(function(l){return'<br><span class="srcb dch">'+esc(l)+'</span>'}).join('')+'<br>Target: '+it.pct+'% below '+(it.refSrc==='ebay_typical'?'eBay\u2019s typical price when you added it':it.refSrc==='hukd'?'the HotUKDeals price when you added it':'the price you entered')+' ('+gbp(it.orig)+'). That\u2019s your own goal, not a verified RRP.</p></div>'+
   errBox(it)+cmpBox(it)+dealBox(it)+
   buyHtml(it.url,'card')+'<div class="foot">'+spark(it.hist||[],t)+'<div class="row" style="flex:0"><button data-a="edit" aria-label="Edit '+esc(it.name)+'">Edit</button><button class="danger" data-a="del" aria-label="Delete '+esc(it.name)+'">Delete</button></div></div>';c.appendChild(d)});
  $('feed').innerHTML=S.alerts.length?S.alerts.map(function(a){return'<div class="alert pr" data-kind="obs">'+esc(a.text)+'<time datetime="'+a.t+'">'+new Date(a.t).toLocaleString('en-GB')+' · <span class="srcb">'+esc(a.src||'source not recorded')+'</span></time>'+(safeUrl(a.th)&&/hotukdeals\.com/.test(a.th)?'<a class="thread" href="'+esc(a.th)+'" target="_blank" rel="noopener">View the HotUKDeals thread</a>':'')+buyHtml(a.url,'alert')+'</div>'}).join(''):'<p class="empty">'+(WD_DEMO?'No alerts yet. Try \u201cSimulate a day\u201d.':'No alerts yet. We\u2019ll add one here when a tracked price is 10%+ below its reference or hits your target.')+'</p>';
@@ -645,6 +668,6 @@ load();if(S.auto&&WD_DEMO){$('auto').checked=true;timer=setInterval(simulate,200
 var first=!S.seeded&&!S.items.length;
 render();route();srcHint();
 if(first&&!shared){setTimeout(function(){$('what').focus()},50)}
-Promise.all([HukdAdapter.init(),EbayAdapter.init()]).then(function(){buildSrcSel();srcHint();render();return first&&WD_DEMO?seed():refreshAll()}).then(function(){save();render();document.documentElement.dataset.ready='1'});
+Promise.all([HukdAdapter.init(),EbayAdapter.init(),Prices.init()]).then(function(){S.items.forEach(linkCid);buildSrcSel();srcHint();render();return first&&WD_DEMO?seed():refreshAll()}).then(function(){save();render();document.documentElement.dataset.ready='1'});
 })();
 </script></body></html>

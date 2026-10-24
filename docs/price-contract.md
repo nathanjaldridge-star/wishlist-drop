@@ -99,6 +99,7 @@ Fetched server-side only by `scripts/fetch-ebay.mjs` (GitHub Actions, every 30 m
 | was_price | always null (we never use RRP/"was") |
 | in_stock | true for an ok record (an active Buy It Now listing) |
 | confidence | 0.5 + 0.1 per matching listing, capped at 0.9 |
+| catalogue_id | Drop Club catalogue id (`DC` + 9 characters + a check character), copied from `data/watchlist.json`. The same product at every retailer. Optional |
 | watch_id | the `data/watchlist.json` item the record answers (optional field, eBay only) |
 | market_stats | `{lowest, median, mean, count, trimmed, basis}` over the matching listings after a Tukey 1.5×IQR trim. **median = "typical price on eBay"**, not an RRP (optional field, eBay only) |
 

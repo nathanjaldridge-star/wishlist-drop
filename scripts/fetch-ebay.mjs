@@ -81,7 +81,7 @@ export function stats(list) {
 
 /** Parse a Browse item_summary/search response for one watch item. Pure. */
 export function parseSearch(json, w, nowIso) {
-  const base = { product_id: `ebay:watch:${w.id}`, canonical_url: `https://www.ebay.co.uk/sch/i.html?_nkw=${encodeURIComponent(w.query)}`, retailer: 'eBay', title: w.title, current_price: null, currency: 'GBP', fetched_at: nowIso, in_stock: null, was_price: null, is_promo: false, promo_code: null, delivery_cost: null, price_history: [], source: 'ebay_browse', confidence: 0, watch_id: w.id };
+  const base = { product_id: `ebay:watch:${w.id}`, canonical_url: `https://www.ebay.co.uk/sch/i.html?_nkw=${encodeURIComponent(w.query)}`, retailer: 'eBay', title: w.title, current_price: null, currency: 'GBP', fetched_at: nowIso, in_stock: null, was_price: null, is_promo: false, promo_code: null, delivery_cost: null, price_history: [], source: 'ebay_browse', confidence: 0, watch_id: w.id, ...(w.catalogue_id ? { catalogue_id: w.catalogue_id } : {}) };
   if (!json || typeof json !== 'object' || (json.itemSummaries !== undefined && !Array.isArray(json.itemSummaries)) || (json.itemSummaries === undefined && typeof json.total !== 'number'))
     return { ...base, error_state: 'changed', error_detail: 'eBay response did not have the expected itemSummaries list.' };
   const rows = (json.itemSummaries || []).map((it) => {
@@ -158,7 +158,7 @@ export async function run(o = {}) {
   }
   const out = { version: 1, generated_at: nowIso, source: 'ebay_browse', marketplace: MARKETPLACE, status, calls,
     label: 'Live prices from the eBay Browse API (new, Buy It Now, GBP, UK delivery). Typical price = median of matching listings with outliers trimmed; it is not an RRP.',
-    watchlist_count: WL.items.length, watchlist: WL.items.map((w) => ({ id: w.id, title: w.title })), items, meta };
+    watchlist_count: WL.items.length, watchlist: WL.items.map((w) => ({ id: w.id, title: w.title, ...(w.catalogue_id ? { catalogue_id: w.catalogue_id } : {}) })), items, meta };
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT + '.tmp', JSON.stringify(out) + '\n'); renameSync(OUT + '.tmp', OUT);
   if (logLines.length) { mkdirSync(dirname(LOG), { recursive: true }); appendFileSync(LOG, logLines.map((l) => JSON.stringify(l)).join('\n') + '\n'); }

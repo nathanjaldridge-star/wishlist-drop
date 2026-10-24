@@ -85,11 +85,11 @@ const unl=await p.$$eval('.card',cs=>cs.filter(c=>{const b=c.querySelector('.sta
 const sources=await p.evaluate(()=>{const ebay=[...document.querySelectorAll('#srcList .src')].find(e=>/eBay/.test(e.textContent));return ebay&&ebay.textContent});As.match(sources,/Live/);As.match(sources,/not an RRP/);
 As.equal(p.errs.length,0,p.errs.join('|'));await p.context().close();
 ok('no unlabelled prices on cards; Sources lists eBay as Live with the not-an-RRP note; no JS errors');
-// 9. stale eBay data (>24h) is not shown
-p=await open({ebay:EBAY,clock:'2026-10-25T13:00:00Z'});await p.fill('#what','Sony WH-1000XM5 headphones');await p.evaluate(()=>WD.preview());pv=await p.textContent('#livePrev');
+// 9. stale eBay data (>6h, eBay's licence limit) is not shown
+p=await open({ebay:EBAY,clock:'2026-10-24T18:38:00Z'});await p.fill('#what','Sony WH-1000XM5 headphones');await p.evaluate(()=>WD.preview());pv=await p.textContent('#livePrev');
 As.ok(!/Live price from eBay/.test(pv),pv);
-st=await p.evaluate(()=>WD.ebay.getPrice({id:'s',name:'Sony WH-1000XM5 headphones',url:''}));As.equal(st.error_state,'not_found');As.match(st.error_detail,/older than 24h/);V(st,'stale');
-await p.context().close();ok('eBay records older than 24h are not shown (not_found "older than 24h")');
+st=await p.evaluate(()=>WD.ebay.getPrice({id:'s',name:'Sony WH-1000XM5 headphones',url:''}));As.equal(st.error_state,'not_found');As.match(st.error_detail,/older than 6h/);V(st,'stale');
+await p.context().close();ok('eBay records more than 6h old are not shown (eBay licence; not_found "older than 6h")');
 // 10. shared list keeps the eBay label
 p=await open({ebay:EBAY});await p.fill('#what','Sony WH-1000XM5 headphones');await p.evaluate(()=>WD.preview());await p.click('#submitBtn');await p.waitForTimeout(300);
 const su=await p.evaluate(()=>WD.shareUrl());await p.goto(su);await p.waitForSelector('#roView:not([hidden])');As.match(await p.textContent('#roList'),/eBay, live price · checked 24 Oct/);await p.context().close();
